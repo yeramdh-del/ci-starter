@@ -15,8 +15,18 @@ class Board extends MY_Controller
     {
 
         
+        $query= $this->db->query('
+            select board.*,user.name as author
+            from board
+                left join user
+                ON board.user_idx = user.idx
+            ');
+        $result = $query->result();
+
+        
         $data["page_title"]='게시판';
         $data['content']= 'board/list';
+        $data['board_list'] = $result;
         $this->load->view( 'layout', $data );
     }
 

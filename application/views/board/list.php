@@ -1,34 +1,39 @@
 
 <?php
 
-    //FIXME: 임시 테스트
-    $posts = array([
-        "id" => "1",
-        "title"=> "test",
-        "content"=> "test content",
-        "author" => "작성자",
-        "created_date"=> "2024-06-01",
-    ],[
-        "id" => "2",
-        "title"=> "test2",
-        "content"=> "test2 content",
-        "author" => "작성자1",
-        "created_date"=> "2024-06-02",
-    ],
-    [
-        "id" => "3",
-        "title"=> "test3",
-        "content"=> "test2 content",
-        "author" => "작성자1",
-        "created_date"=> "2024-06-02",
-    ],
-[
-        "id" => "3",
-        "title"=> "test3",
-        "content"=> "test2 content",
-        "author" => "작성자1",
-        "created_date"=> "2024-06-02",
-    ]);
+    
+    
+    $posts = $board_list;
+
+//     //FIXME: 임시 테스트
+//     $posts = array([
+//         "id" => "1",
+//         "title"=> "test",
+//         "content"=> "test content",
+//         "author" => "작성자",
+//         "created_date"=> "2024-06-01",
+//     ],[
+//         "id" => "2",
+//         "title"=> "test2",
+//         "content"=> "test2 content",
+//         "author" => "작성자1",
+//         "created_date"=> "2024-06-02",
+//     ],
+//     [
+//         "id" => "3",
+//         "title"=> "test3",
+//         "content"=> "test2 content",
+//         "author" => "작성자1",
+//         "created_date"=> "2024-06-02",
+//     ],
+// [
+//         "id" => "3",
+//         "title"=> "test3",
+//         "content"=> "test2 content",
+//         "author" => "작성자1",
+//         "created_date"=> "2024-06-02",
+//     ]);
+
 ?>
 
 
@@ -48,11 +53,16 @@
     </div>
 
 
+    <div>
+        <?php $board_list?>
+    </div>
+
+
 <div class="table-container">
     <table>
         <thead>
             <tr>
-                <th class="col-num">번호</th>
+                <th class="col-idx">번호</th>
                 <th class="col-title">제목</th>
                 <th class="col-author">작성자</th>
                 <th class="col-date">작성일</th>
@@ -63,14 +73,14 @@
             <?php if(!empty($posts)): ?>
                 <?php foreach($posts as $post): ?>
                     <tr>
-                        <td class="col-num"><?php echo $post['id']; ?></td>
+                        <td class="col-idx"><?php echo $post->idx; ?></td>
                         <td class="col-title">
-                            <a href="<?php echo site_url('board/view/' . $post['id']); ?>">
-                                <?php echo $post['title']; ?>
+                            <a href="<?php echo site_url('board/view/' . $post->idx); ?>">
+                                <?php echo $post->title; ?>
                             </a>
                         </td>
-                        <td class="col-author"><?php echo $post['author']; ?></td>
-                        <td class="col-date"><?php echo $post['created_date']; ?></td>
+                        <td class="col-author"><?php echo $post->author; ?></td>
+                        <td class="col-date"><?php echo $post->created_at; ?></td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>

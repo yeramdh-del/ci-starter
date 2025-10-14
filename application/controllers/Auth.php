@@ -31,9 +31,25 @@
 
         }
 
-        //TODO:비밀번호 중복 체크
-        public function register_check(){
-        
-            
+         // 회원가입 데이터 처리
+    public function register_check()
+    {
+        // POST 데이터 받기
+        $name = $this->input->post('name');
+        $email = $this->input->post('email');
+        $password = $this->input->post('password');
+        $password_confirm = $this->input->post('password_confirm');
+
+        // 비밀번호 중복 체크
+        if($password !== $password_confirm) {
+            echo "<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>";
+            return;
         }
+
+        // 비밀번호 일치 시 로그인 페이지로 이동
+        echo "<script>alert('회원가입이 완료되었습니다.'); location.href='" . site_url('auth/login') . "';</script>";
     }
+  
+
+
+}

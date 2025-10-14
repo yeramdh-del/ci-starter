@@ -92,7 +92,7 @@ tbody tr:hover {
 }
 
 /* 번호 칼럼 */
-.col-num {
+.col-idx {
     width: 10%;
     text-align: center;
 }

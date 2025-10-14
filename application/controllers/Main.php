@@ -8,12 +8,13 @@ class Main extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->database();
     }
 
     //메인 경로
     public function index()
     {
-
+        
         //로그인시
         redirect("board");
     }

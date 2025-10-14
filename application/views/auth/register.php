@@ -4,7 +4,7 @@
     
     <form action="<?php echo site_url('auth/register_check'); ?>" method="post">
         <div class="form-group">
-            <label for="name">닉네임</label>
+            <label for="name">이름</label>
             <input type="text" id="name" name="name" required>
         </div>
 
@@ -47,7 +47,7 @@
         margin-bottom: 30px;
     }
 
-    .submit{
+     .submit{
         width: 100%;
         padding: 12px; 
         background-color: #007bff;
