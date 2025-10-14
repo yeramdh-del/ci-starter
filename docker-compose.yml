@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      # 실시간 코드 동기화를 위한 볼륨 마운트
+      - ./:/var/www/html
+      # 로그 파일도 실시간으로 확인 가능
+      - ./logs:/var/log/apache2
+    depends_on:
+      - db
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+      # 개발 환경 설정
+      - CI_ENV=development
+    # 개발 중 파일 변경 감지 개선
+    restart: unless-stopped
+    # 파일 변경 감지를 위한 추가 설정
+    tmpfs:
+      - /tmp
+      - /var/tmp
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ci_starter
+      MYSQL_USER: codeigniter
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # MySQL 설정 최적화
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql_data:
