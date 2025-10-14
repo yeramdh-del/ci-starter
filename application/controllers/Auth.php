@@ -23,6 +23,22 @@
             $this->load->view("layout", $data);
         }
 
+        public function login_check(){
+            $email = $this->input->post('email');
+            $password = $this->input->post('password');
+
+            $this->db->where('email', $email);
+            $this->db->where('password', $password);
+            $user = $this->db->get('user')->row_array();
+
+            if($user){
+                $this->session->set_userdata('user', $user);
+                redirect('board');
+            }else{
+                echo "<script>alert('로그인에 실패했습니다.'); history.back();</script>";
+            }
+        }
+
         //회원가입
         public function register(){
             $data["page_title"]='회원가입';
@@ -45,6 +61,20 @@
             echo "<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>";
             return;
         }
+
+        //닉네임 중복확인
+
+        //이메일 중복확인
+
+        //db정보 저장
+        $data = array(
+            'name' => $name,
+            'email' => $email,
+            'password' => $password
+        );
+        
+        $this->db->insert('user', $data);
+
 
         // 비밀번호 일치 시 로그인 페이지로 이동
         echo "<script>alert('회원가입이 완료되었습니다.'); location.href='" . site_url('auth/login') . "';</script>";
