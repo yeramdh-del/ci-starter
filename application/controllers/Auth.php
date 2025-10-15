@@ -15,7 +15,7 @@
         }
 
 
-        //로그인 페이지
+        //NOTE: 로그인 - 로그인 페이지
         public function login(){ 
 
             $data["page_title"]="로그인";
@@ -23,23 +23,37 @@
             $this->load->view("layout", $data);
         }
 
+        //NOTE: 로그인 - 회원정보 확인 매서드
         public function login_check(){
-            $email = $this->input->post('email');
-            $password = $this->input->post('password');
 
-            $this->db->where('email', $email);
-            $this->db->where('password', $password);
-            $user = $this->db->get('user')->row_array();
+            $email = $this->input->post("email");
+            $password = $this->input->post("password");
 
-            if($user){
-                $this->session->set_userdata('user', $user);
-                redirect('board');
-            }else{
-                echo "<script>alert('로그인에 실패했습니다.'); history.back();</script>";
+            $this->load->model("Auth_model");
+
+            $user_info = $this->Auth_model->get_one_by_email($email);
+
+            if(!$user_info){
+                echo "<script>alert('존재하지 않는 이메일입니다.'); history.back();</script>";
+                return;
             }
+
+            if($user_info->password != $password){
+                echo "<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>";
+                return;
+            }
+            else{
+                //비밀번호 값제거
+                unset($user_info->password);
+                //회원 정보 세션 저장
+                $this->session->set_userdata('user',$user_info);
+                redirect('board');
+            }
+            
         }
 
-        //회원가입
+
+        //NOTE: 회원가입 - 페이지 이동
         public function register(){
             $data["page_title"]='회원가입';
             $data['content']= 'auth/register';
@@ -47,7 +61,8 @@
 
         }
 
-         // 회원가입 데이터 처리
+
+    //NOTE: 회원가입 - 회원가입 유저 정보 저장 매서드
     public function register_check()
     {
         // POST 데이터 받기
@@ -56,30 +71,41 @@
         $password = $this->input->post('password');
         $password_confirm = $this->input->post('password_confirm');
 
-        // 비밀번호 중복 체크
+        //비밀번호 중복 체크
         if($password !== $password_confirm) {
             echo "<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>";
             return;
         }
 
-        //닉네임 중복확인
+        $this->load->model("Auth_model");
 
-        //이메일 중복확인
+        // 이메일 중복 체크
+        $user_info = $this->Auth_model->get_one_by_email($email);
 
-        //db정보 저장
-        $data = array(
-            'name' => $name,
-            'email' => $email,
-            'password' => $password
-        );
+        if($user_info){
+            echo "<script>alert('중복된 이메일입니다. 다른 이메일을 사용하세요'); history.back();</script>";
+            return;
+        }
         
-        $this->db->insert('user', $data);
+        // 닉네임 중복 체크
+        $select_name_result = $this->Auth_model->get_one_by_name($name);
 
+        if($select_name_result){
+            echo "<script>alert('중복된 이름입니다. 다른 이름을 사용하세요'); history.back();</script>";
+            return;
+        }
 
+        // DB에 회원정보 저장
+        $this->Auth_model->create($name,$email,$password);
         // 비밀번호 일치 시 로그인 페이지로 이동
         echo "<script>alert('회원가입이 완료되었습니다.'); location.href='" . site_url('auth/login') . "';</script>";
     }
   
 
+    //NOTE: 로그아웃
+    public function logout(){
+        $this->session->unset_userdata('user');
+        redirect('board');
+    }
 
 }
