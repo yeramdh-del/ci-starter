@@ -1,3 +1,8 @@
+<?php
+    $user = $this->session->userdata('user');
+    
+ ?>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -12,8 +17,19 @@
     <!-- 헤더 -->
     <header>
         <div class="header-container">
-            <a href="<?php echo site_url("board")?>" style="text-decoration: none;"><h1 class="header-title">게시글</h1></a>
-            <a href="<?php echo site_url('auth/login'); ?>"><button class="login-btn">로그인</button></a>
+            <a href="/board" style="text-decoration: none;"><h1 class="header-title">게시글</h1></a>
+            
+           <?php if ($user): ?>
+                <!-- FIXME: 로그인 유무 확인용 -->
+                <div style="display: flex; gap:2px; ">
+                    <p ><?php echo $user->name?>님 환영합니다.</p>
+                    <a href="/auth/logout"><button class="login-btn">로그아웃</button></a>
+                </div>
+                <?php else: ?>
+            <a href="/auth/login"><button class="login-btn">로그인</button></a>
+
+            <?php endif; ?>
+            
         </div>
     </header>
 
