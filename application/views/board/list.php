@@ -2,10 +2,16 @@
 <?php
     $posts = $board_list;
 
+    $curr_page = $board_info->pages; //현재 페이지
+    $limit = $board_info->limit; //제한 수
+    $total = $board_info->total; //총 수
+    $search = $board_info->search; //검색어
+    $total_page = ceil($total / $limit); //총 페이지 수
+
 //     //FIXME: 임시 테스트
 //     $posts = array([
 //         "id" => "1",
-//         "title"=> "test",
+//         "title"=> "test",=
 //         "content"=> "test content",
 //         "author" => "작성자",
 //         "created_date"=> "2024-06-01",
@@ -86,5 +92,43 @@
             <?php endif; ?>
         </tbody>
     </table>
+
 </div>
 
+<div class="pagination-container">
+    <nav>
+        <ul>
+            <?php if($curr_page > 0): ?>
+                <li>
+                    <a href="<?= base_url('board?pages='.($curr_page-1).'&limit='.$limit.'&search='.urlencode($search)) ?>">이전</a>
+                </li>
+            <?php endif; ?>
+
+            <?php for($i=0; $i<$total_page; $i++): ?>
+                <li class="<?= $i == $curr_page ? 'active' : '' ?>">
+                    <a href="<?= base_url('board?pages='.$i.'&limit='.$limit.'&search='.urlencode($search)) ?>">
+                        <?= $i+1 ?>
+                    </a>
+                </li>
+            <?php endfor; ?>
+            
+            <?php if($curr_page < $total_page-1): ?>
+                <li>
+                    <a href="<?= base_url('board?pages='.($curr_page+1).'&limit='.$limit.'&search='.urlencode($search)) ?>">다음</a>
+                </li>
+            <?php endif; ?>
+        </ul>
+    </nav>
+</div>  
+
+<style>
+    .pagination-container{
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    li{
+        display: inline-block;
+    }
+</style>

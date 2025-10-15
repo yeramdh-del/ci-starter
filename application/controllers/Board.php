@@ -23,8 +23,8 @@ class Board extends MY_Controller
     {
 
         //리스트 최대 갯수 및 페이지 수
-        $limit = $this->input->get('limit') ?: 10;
-        $pages = $this->input->get('pages') ?: 0;
+        $limit = (int)$this->input->get('limit') ?: 10;
+        $pages = (int)$this->input->get('pages') ?: 0;
         $search = $this->input->get('search') ?:null;
 
 
@@ -49,6 +49,7 @@ class Board extends MY_Controller
             'limit' => $limit,
             'pages' => $pages,
             'search' => $search,
+            'total' => $count->total,
         ];
 
 
