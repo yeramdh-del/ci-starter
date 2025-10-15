@@ -15,8 +15,14 @@ class Main extends MY_Controller
     public function index()
     {
         
+        //NOTE: 페이지 및 리스트 최대 갯수 기본값 설정
+        $params = [
+            'limit' => 10,
+            'pages' => 1,   
+        ];
+
         //로그인시
-        redirect("board");
+        redirect("board?". http_build_query($params));
     }
     
 }

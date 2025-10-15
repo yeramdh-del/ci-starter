@@ -12,25 +12,27 @@ class Board_model extends MY_Model{
 
 
     //게시글 리스트 전체 검색 매서드
-    public function get_all($search = null, $limit = 10, $pages= 0){
+    public function get_all($search = "", $limit = 10, $pages= 0){
 
         //리스트 출력
         //NOTE: 기능정의서 목록 부분
         //  - 작성시간 내림차순
         //  - 페이지당 표시될 갯수 지정
-        $select_query= '
+        $select_query= "
             SELECT
                 board.*,
                 user.name as author
-            from 
+            FROM
                 board
                     left join user
                     ON board.user_idx = user.idx
+            WHERE title LIKE '%$search%'
             ORDER BY
                 created_at DESC
             LIMIT ?
             OFFSET ?
-            ';
+            ";
+
         $query= $this->db->query($select_query,array($limit,($pages*$limit)));
         return $query->result();
 

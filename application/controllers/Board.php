@@ -10,13 +10,21 @@ class Board extends MY_Controller
         parent::__construct();
     }
 
+    private function is_login(){
+        if($this->session->userdata('user')){
+            return true;
+        }
+        return false;
+
+    }
+
     //NOTE: 게시판 - 게시판 리스트 경로
     public function index()
     {
 
         //리스트 최대 갯수 및 페이지 수
         $limit = $this->input->get('limit') ?: 10;
-        $pages = $this->input->get('pages') ?: 1;
+        $pages = $this->input->get('pages') ?: 0;
         $search = $this->input->get('search') ?:null;
 
 
@@ -26,11 +34,11 @@ class Board extends MY_Controller
         $this->load->model("Board_model");
 
         //게시글 리스트 반환 쿼리
-        $result = $this->Board_model->get_all();
+        $result = $this->Board_model->get_all($search, $limit, $pages);
 
 
         //게시글 전채 갯수 반환 (페이지네이션용)
-        $count = $this->Board_model->get_all_count();
+        $count = $this->Board_model->get_all_count($search);
     
         
         $data["page_title"]='게시판';
@@ -42,6 +50,8 @@ class Board extends MY_Controller
             'pages' => $pages,
             'search' => $search,
         ];
+
+
         $this->load->view( 'layout', $data );
     }
 
