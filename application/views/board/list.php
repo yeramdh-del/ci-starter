@@ -1,8 +1,5 @@
 
 <?php
-
-    
-    
     $posts = $board_list;
 
 //     //FIXME: 임시 테스트
@@ -45,7 +42,7 @@
         </div>
 
         <div>
-            <a href="<?php echo site_url("board/register")?>">
+            <a href= "/board/register">
                 <button class="login-btn">등록</button>
             </a>
             
@@ -75,7 +72,7 @@
                     <tr>
                         <td class="col-idx"><?php echo $post->idx; ?></td>
                         <td class="col-title">
-                            <a href="<?php echo site_url('board/view/' . $post->idx); ?>">
+                            <a href="<?php echo site_url('board/detail/' . $post->idx); ?>">
                                 <?php echo $post->title; ?>
                             </a>
                         </td>

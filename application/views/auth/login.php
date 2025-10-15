@@ -1,7 +1,7 @@
 <div class="login_box">
     <h2 class="title">로그인</h2>
     
-    <form action="<?php echo site_url('auth/login_check'); ?>" method="post">
+    <form action="/auth/login_check" method="post">
         <div class="form-group">
             <label for="email">이메일</label>
             <input type="email" id="email" name="email" required >
@@ -16,7 +16,7 @@
     </form>
 
     <div style="text-align: center; margin-top: 20px;">
-        <p>계정이 없으신가요? <a href="<?php echo site_url('auth/register'); ?>" style="color: #007bff; text-decoration: none;">회원가입</a></p>
+        <p>계정이 없으신가요? <a href="/auth/register" style="color: #007bff; text-decoration: none;">회원가입</a></p>
     </div>
 </div>
 
