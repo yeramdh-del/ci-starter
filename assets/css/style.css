@@ -157,6 +157,11 @@ tbody tr:hover {
         border: none;
         border-radius: 4px;
         font-size: 16px;
+        
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
 }
 
 /* 취소버트는 a 태그 */
@@ -170,6 +175,24 @@ tbody tr:hover {
         text-decoration: none;
 }
 
+
+.btn-cancel:hover {
+    background-color: #a83d2f;
+}
+
+
+.btn-danger {
+        padding: 12px; 
+        background-color: #c82333;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        text-decoration: none;
+}
+.btn-danger:hover {
+    background-color: #a01a27;
+}
 
 
 /* 페이지네이션 */

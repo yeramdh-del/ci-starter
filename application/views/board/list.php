@@ -1,8 +1,5 @@
 
 <?php
-
-    
-    
     $posts = $board_list;
 
 //     //FIXME: 임시 테스트
@@ -39,13 +36,13 @@
 
 
     <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
-        <div style="display:flex; gap:5px">
-            <input  style="padding: 10px 20px;" type="text" id="title" placeholder="제목을 입력하세요.">
-            <button>검색</button>
-        </div>
+        <form method="get" action="<?= base_url('board') ?>" style="display:flex; gap:5px">
+            <input style="padding: 10px 20px;" type="text" name="search" placeholder="제목을 입력하세요.">
+            <button type="submit">검색</button>
+        </form>
 
         <div>
-            <a href="<?php echo site_url("board/register")?>">
+            <a href= "/board/register">
                 <button class="login-btn">등록</button>
             </a>
             
@@ -69,13 +66,12 @@
             </tr>
         </thead>
         <tbody>
-            <!-- FIXME: 임시 데이터용 추후 변경가능함 -->
             <?php if(!empty($posts)): ?>
                 <?php foreach($posts as $post): ?>
                     <tr>
                         <td class="col-idx"><?php echo $post->idx; ?></td>
                         <td class="col-title">
-                            <a href="<?php echo site_url('board/view/' . $post->idx); ?>">
+                            <a href="<?php echo site_url('board/detail/' . $post->idx); ?>">
                                 <?php echo $post->title; ?>
                             </a>
                         </td>
@@ -91,7 +87,4 @@
         </tbody>
     </table>
 </div>
-<!-- 페이지네이션
-<div class="pagination-container">
-    <?php echo $this->pagination->create_links(); ?>
-</div> -->
+

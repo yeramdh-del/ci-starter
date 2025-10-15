@@ -2,7 +2,7 @@
 <div class="register_box">
     <h2 class="title">회원가입</h2>
     
-    <form action="<?php echo site_url('auth/register_check'); ?>" method="post">
+    <form action="/auth/register_check" method="post">
         <div class="form-group">
             <label for="name">이름</label>
             <input type="text" id="name" name="name" required>
@@ -27,7 +27,7 @@
     </form>
 
     <div class="form-footer">
-        <p>이미 계정이 있으신가요? <a href="<?php echo site_url('auth/login'); ?>">로그인</a></p>
+        <p>이미 계정이 있으신가요? <a href="/auth/login">로그인</a></p>
     </div>
 </div>
 
