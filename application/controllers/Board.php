@@ -96,9 +96,83 @@ class Board extends MY_Controller
         redirect("board");
     }
 
-    //TODO: 수정 페이지
+    //NOTE: 게시판 - 수정 페이지
+    public function edit($idx){
+             $select_board_one = "
+            SELECT
+                idx,
+                title,
+                content
+            FROM
+                board
+            WHERE
+                idx = ?
+        ";
+        $select_board_one_query = $this->db->query($select_board_one,array($idx));
+        $result = $select_board_one_query->row();
+
+        $data["page_title"]='게시판 수정페이지';
+        $data['content']= "board/edit";
+        $data["board_info"] = $result;
+        $this->load->view("layout", $data);
+
+    }
+
+    //NOTE: 게시판 - 수정 매서드
+    public function update($idx){
+        //수정될 게시판 정보
+        $title = $this->input->post("title");
+        $content = $this->input->post("content");
+
+        //권한 확인
+        $user = $this->session->userdata("user");
+        
+        $select_board_one = "
+            SELECT
+                b.idx,
+                b.user_idx
+            FROM
+                board AS b
+            WHERE
+                b.idx = ?
+        ";
+        $select_board_one_query = $this->db->query($select_board_one,array($idx));
+        $board_one = $select_board_one_query->row();
+
+
+        echo json_encode($board_one);
+        //존재하지 않는 게시글일때 알람 출력
+        if(!$board_one){
+           echo "
+                <script>
+                    alert('존재하지 않는 게시글입니다.');
+                    location.href = '" . base_url('board') . "';
+                </script>";
+           
+        }elseif($board_one && $board_one->user_idx != $user->idx){
+               echo "
+                <script>
+                    alert('권한이 없는 사용자입니다.');
+                    location.href = '" . base_url('board') . "';
+                </script>";
+        }else{
+
+            $update_board = "
+                UPDATE
+                    board
+                SET
+                    title = ?,
+                    content = ?
+                WHERE
+                    idx = ?
+            ";
+            $this->db->query($update_board,array($title,$content,$idx));
+            redirect("board");
+        }
+
+    }
     
-    //TODO: 상세 페이지
+    //NOTE: 게시판 - 상세 페이지
     public function detail($idx){
 
         $select_board_detail = "
@@ -124,5 +198,49 @@ class Board extends MY_Controller
         $this->load->view("layout", $data);
     }
 
-    //TODO: 삭제 기능
+    //NOTE: 삭제 매서드
+        public function delete($idx){
+        
+            //권한 확인
+            $user = $this->session->userdata("user");
+            
+            $select_board_one = "
+                SELECT
+                    b.idx,
+                    b.user_idx
+                FROM
+                    board AS b
+                WHERE
+                    b.idx = ?
+            ";
+            $select_board_one_query = $this->db->query($select_board_one,array($idx));
+            $board_one = $select_board_one_query->row();
+
+            //존재하지 않는 게시글일때 알람 출력
+            if(!$board_one){
+            echo "
+                    <script>
+                        alert('존재하지 않는 게시글입니다.');
+                        location.href = '" . base_url('board') . "';
+                    </script>";
+            //권한 확인
+            }elseif($board_one && $board_one->user_idx != $user->idx){
+                echo "
+                    <script>
+                        alert('권한이 없는 사용자입니다.');
+                        location.href = '" . base_url('board') . "';
+                    </script>";
+            }else{
+                $delete_board = "
+                    DELETE FROM board
+                    WHERE idx = ?
+                ";
+                $this->db->query($delete_board,array($idx));
+
+                redirect("board");
+            }
+
+
+        
+        }
 }
