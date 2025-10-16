@@ -41,12 +41,13 @@ class Board_model extends MY_Model{
 
     //게시글 전채 갯수 검색 매서드
     public function get_all_count($search=null){
-        $select_query= '
+        $select_query= "
             SELECT
                 COUNT(idx) AS total
-            from 
+            FROM 
                 board
-            ';
+            WHERE title LIKE '%$search%'
+            ";
         $query= $this->db->query($select_query);
         return $query->row();
     }
