@@ -2,6 +2,12 @@
 <?php
     $posts = $board_list;
 
+    $curr_page = $board_info->pages; //현재 페이지
+    $limit = $board_info->limit; //제한 수
+    $total = $board_info->total; //총 게시글 갯수
+    $search = $board_info->search; //검색어
+    $total_page = ceil($total / $limit); //총 페이지 수
+
 //     //FIXME: 임시 테스트
 //     $posts = array([
 //         "id" => "1",
@@ -88,3 +94,32 @@
     </table>
 </div>
 
+
+<!-- 
+    BUG: 페이지네이션 갯수 제안후 이전,다음 버튼 추가하기
+ -->
+<div class="pagination-container">
+    <nav>
+        <ul>
+            <?php for($i=0; $i<$total_page; $i++): ?>
+                <li class="<?= $i == $curr_page ? 'active' : '' ?>">
+                    <a href="<?= base_url('board?pages='.$i.'&limit='.$limit.'&search='.urlencode($search)) ?>">
+                        <?= $i+1 ?>
+                    </a>
+                </li>
+            <?php endfor; ?>
+        </ul>
+    </nav>
+</div>
+
+<style>
+    .pagination-container{
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    li{
+        display: inline-block;
+    }
+</style>

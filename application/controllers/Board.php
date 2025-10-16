@@ -10,6 +10,7 @@ class Board extends MY_Controller
         parent::__construct();
     }
 
+    //로그인 상태 확인
     private function is_login(){
         if($this->session->userdata('user')){
             return true;
@@ -18,13 +19,18 @@ class Board extends MY_Controller
 
     }
 
+    //TODO: 본인 개시글인지 확인 매서드
+    private function is_admin(){
+
+    }
+
     //NOTE: 게시판 - 게시판 리스트 경로
     public function index()
     {
 
         //리스트 최대 갯수 및 페이지 수
-        $limit = $this->input->get('limit') ?: 10;
-        $pages = $this->input->get('pages') ?: 0;
+        $limit = (int)$this->input->get('limit') ?: 10;
+        $pages = (int)$this->input->get('pages') ?: 0;
         $search = $this->input->get('search') ?:null;
 
 
@@ -48,7 +54,8 @@ class Board extends MY_Controller
         $data['board_info'] = (object)[
             'limit' => $limit,
             'pages' => $pages,
-            'search' => $search,
+            'search' => $search, //FIXME: 임시 코드 추후 세션또는 다른방향 검토할 것
+            'total' => $count->total,
         ];
 
 
@@ -57,6 +64,17 @@ class Board extends MY_Controller
 
     //NOTE: 게시판 - 등록 페이지
     public function register(){
+
+
+        //로그인 후 접근 가능하도록 차단
+        if(!$this->is_login()){
+            echo "
+                <script>
+                    alert('로그인 후 이용해주십시오.');
+                    history.back();
+                </script>";
+        }
+
         $data['page_title']= '게시글 등록';
         $data['content']= 'board/register';
         $this->load->view( 'layout', $data );
