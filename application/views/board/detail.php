@@ -203,7 +203,7 @@
                 dataType: 'json',
                 success: function(res) {
                     if (res.success) {
-                        alert('댓글이 등록되었습니다.');
+                        // alert('댓글이 등록되었습니다.');
                         $('#comment_list').empty();
                         $('#load_more_top_comments').hide();
                         loadTopComments();
@@ -245,7 +245,7 @@
                 dataType: 'json',
                 success: function (res) {
                     if (res.success) {
-                        alert('답글이 등록되었습니다.');
+                        // alert('답글이 등록되었습니다.');
                         $('#comment_list').empty();
                         $('#load_more_top_comments').hide();
                         loadTopComments();
