@@ -33,7 +33,7 @@ class Comment_model extends CI_Model
 
         // 각 댓글에 대해 자식 댓글 초기 세팅
         foreach ($comments as &$comment) {
-            $children = $this->getRepliesTree($comment['idx'], 10, 0);  // 자식 10개까지
+            $children = $this->getRepliesTree($comment['idx'], $limit, 0);
 
             $comment['children'] = $children;
             $child_count = count($children);

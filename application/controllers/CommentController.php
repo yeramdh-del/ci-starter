@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class CommentController extends CI_Controller
 {
 
-    const MAX_LIST_NUMBER = 10; //NOTE: 최대 댓글 입력 갯수
+    const MAX_LIST_NUMBER = 3; //NOTE: 최대 댓글 입력 갯수
     public function index($board_idx)
     {
         $data = [
