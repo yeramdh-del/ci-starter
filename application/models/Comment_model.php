@@ -34,10 +34,9 @@ class Comment_model extends CI_Model
         // 각 댓글에 대해 자식 댓글 초기 세팅
         foreach ($comments as &$comment) {
             $children = $this->getRepliesTree($comment['idx'], $limit, 0);
-
-            $comment['children'] = $children;
             $child_count = count($children);
-            $comment['has_more_children'] = $this->hasMoreReplies($comment['idx'], $child_count);
+            
+            $comment['has_more_children'] = $child_count > 0 ? true : false;
         }
         return $comments;
     }
@@ -107,5 +106,11 @@ class Comment_model extends CI_Model
     public function insert($data)
     {
         return $this->db->insert($this->table, $data);
+    }
+
+    //댓글 삭제
+    public function delete($idx){
+        $this->db->where('idx', $idx);
+        $this->db->delete($this->table);
     }
 }

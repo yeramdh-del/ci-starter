@@ -11,7 +11,7 @@
         <!-- 본인 계정에서만 수정 삭제 가능하도록 설정 -->
         <?php if( $this->session->userdata('user') && $this->session->userdata('user')->name == $board_info->author): ?>
         <div style="display:flex; gap:2px;">
-        <a href="/board/edit/<?= $board_info->idx ?>" class="btn-primary">수정</a>
+            <a href="/board/edit/<?= $board_info->idx ?>" class="btn-primary">수정</a>
             <a href="/board/delete/<?= $board_info->idx ?>" class="btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
         </div>
         <?php endif;?>
@@ -259,6 +259,40 @@
             });
         });
 
+
+        //NOTE: 댓글 - 댓글 삭제
+        $(document).on('click', '.delete-btn', function(){
+            if(!confirm("정말삭제하시겠습니까?")) return;
+
+            
+            const commentItem = $(this).closest('.comment-item');
+            const commentIdx = commentItem.data('idx');
+            const commentUserIdx = commentItem.data('user_idx');
+            
+            $.ajax({
+                url: '<?= site_url("CommentController/delete") ?>',
+                method : 'POST',
+                data:  {
+                    user_idx : commentUserIdx,
+                    idx : commentIdx,
+                },
+                dataType: 'json',
+                success:function (res) {
+                    
+                    if(res.success){
+                        commentItem.remove(); // 화면에서 제거
+                    }else{
+                        alert(res.message);
+                    }
+                },
+                error: function() {
+                   alert('서버 오류가 발생했습니다.');
+                }
+            });
+
+        });
+        
+
         // 대댓글 더보기 클릭
         $(document).on('click', '.load-more-replies', function () {
             const $btn = $(this);
@@ -286,6 +320,7 @@
                 }
             });
         });
+        
     });
 
 </script>

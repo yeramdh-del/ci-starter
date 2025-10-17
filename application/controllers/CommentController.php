@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-
+//NOTE: 비동기 매서드 response값 form 통일 필요
 class CommentController extends CI_Controller
 {
 
@@ -46,7 +46,7 @@ class CommentController extends CI_Controller
         ]);
     }
 
-    // 댓글 등록
+    // NOTE: 댓글 - 등록
     public function create()
     {
         $this->load->model('Comment_model');
@@ -65,6 +65,33 @@ class CommentController extends CI_Controller
         echo json_encode(['success' => $result]);
     }
 
+    // NOTE: 댓글 - 삭제
+    public function delete(){
+        $this->load->model('Comment_model');
+        $author_idx = $this->input->post('user_idx');
+        $idx = $this->input->post('idx');
+        $user = $this->session->userdata('user');
+
+        
+        if($user->idx != $author_idx){
+             echo json_encode([
+            'success' => false,
+            'data' => null,
+            'message' => "권한이 없는 사용자입니다."
+        ]);
+        }
+        else{
+
+            $this->Comment_model->delete($idx);
+
+            echo json_encode([
+            'success' => true,
+            'data' => null,
+            'message' => null
+        ]);
+        }
+
+    }
     // 대댓글 더보기 Ajax
     public function load_replies()
     {

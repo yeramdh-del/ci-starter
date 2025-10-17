@@ -1,8 +1,10 @@
-
-<div class="comment-item" data-idx="<?= $comment['idx'] ?>" data-depth="<?= $comment['depth'] ?>" style="margin-left: <?= $comment['depth'] * 30 ?>px; border-left: 1px solid #ccc; padding-left: 10px; margin-bottom: 10px;">
+<div class="comment-item" data-user_idx = <?=$comment['user_idx']?> data-idx="<?= $comment['idx'] ?>" data-depth="<?= $comment['depth'] ?>" style="margin-left: 30px; border-left: 1px solid #ccc; padding-left: 10px; margin-bottom: 10px;">
     <div class="comment-header">
         <strong><?= htmlspecialchars($comment['author']) ?></strong>
-        <span style="color:#777; font-size: 0.9em; margin-left:10px;"><?= $comment['created_at'] ?></span>
+        <div style="display:flex; gap:3px;">
+            <span style="color:#777; font-size: 0.9em; margin-left:10px;"><?= $comment['created_at'] ?></span>
+             <div class="delete-btn" style="cursor:pointer;">X</div>
+        </div>
     </div>
 
     <div class="comment-content" style="margin: 5px 0;">
@@ -30,10 +32,10 @@
         <button class="load-more-replies" 
                 data-parent-idx="<?= $comment['idx'] ?>" 
                 data-depth="<?= $comment['depth'] + 1 ?>" 
-                data-page="1" 
-                style="margin-left: <?= ($comment['depth'] + 1) * 5 ?>px;">
-            더보기
+                data-page="1">
+            더보기..
         </button>
+
     <?php endif; ?>
 </div>
 
