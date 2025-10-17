@@ -110,12 +110,26 @@
             <?php endfor; ?>
         </ul>
     </nav>
+
+    <form id="limitForm" method="get" action="<?= base_url('board') ?>">
+        <!-- 유지할 검색어 파라미터 -->
+        <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
+
+        <label for="limit">출력 개수:</label>
+        <select name="limit" id="limit" onchange="document.getElementById('limitForm').submit()">
+            <option value="5" <?= $limit == 5 ? 'selected' : '' ?>>5개</option>
+            <option value="10" <?= $limit == 10 ? 'selected' : '' ?>>10개</option>
+            <option value="20" <?= $limit == 20 ? 'selected' : '' ?>>20개</option>
+            <option value="30" <?= $limit == 30 ? 'selected' : '' ?>>30개</option>
+        </select>
+    </form>
 </div>
+
 
 <style>
     .pagination-container{
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         margin-top: 20px;
     }
 
