@@ -6,6 +6,17 @@ class CommentController extends CI_Controller
 {
 
     const MAX_LIST_NUMBER = 3; //NOTE: 최대 댓글 입력 갯수
+
+
+    private function is_login(){
+
+        $user = $this->session->userdata('user');
+        if($this->session->userdata('user')){
+            return true;
+        }
+        
+        return false;
+    }
     public function index($board_idx)
     {
         $data = [
@@ -49,6 +60,15 @@ class CommentController extends CI_Controller
     // NOTE: 댓글 - 등록
     public function create()
     {
+        if(!$this->is_login()){
+             echo json_encode([
+            'success' => false,
+            'data' => null,
+            'message' => "로그인 후 사용할 수 있습니다."
+        ]);
+        return;
+        }
+
         $this->load->model('Comment_model');
 
         $data = [
@@ -79,6 +99,7 @@ class CommentController extends CI_Controller
             'data' => null,
             'message' => "권한이 없는 사용자입니다."
         ]);
+        return;
         }
         else{
 

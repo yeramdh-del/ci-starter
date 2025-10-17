@@ -209,7 +209,7 @@
                         loadTopComments();
                         $('#commentForm')[0].reset();
                     } else {
-                        alert('댓글 등록 실패');
+                        alert(res.message);
                     }
                 },
                 error: function() {
@@ -250,7 +250,7 @@
                         $('#load_more_top_comments').hide();
                         loadTopComments();
                     } else {
-                        alert('답글 등록 실패');
+                        alert(res.message);
                     }
                 },
                 error: function () {
