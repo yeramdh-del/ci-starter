@@ -46,50 +46,21 @@
         </div>
     </div>
 
-    <!-- 댓글 영역 (추후 개발 예정) -->
-    
-    <!-- NOTE: 임시 1차 개발 내용 -->
-    <!-- <div class="comment-section" style="margin-top: 40px;">
-        <h3>댓글</span></h3>
-                
+    <!-- 댓글 영역 -->
+    <div class="comment-section">
+        <h3>댓글</h3>
+
         <form id="commentForm" method="post">
             <input type="hidden" name="board_idx" value="<?= $board_info->idx ?>">
-            <div class="form-group" style="margin-bottom:0px;">
-                <textarea name="comment" placeholder="댓글을 입력하세요" required style="max-height: 100px;"></textarea>
-            </div>
+            <textarea name="comment" placeholder="댓글을 입력하세요" required></textarea>
             <button type="submit">댓글 등록</button>
         </form>
 
-        <div class="comment-list" id="comment_list">
-            <div class="comment-item">
-                <div class="comment-header">
-                    <span class="comment-author">작성자명</span>
-                    <span class="comment-date">2024-01-15 14:30</span>
-                </div>
-                <div class="comment-content">
-                    댓글 내용이 여기에 표시됩니다.
-                </div>
-                <div class="comment-actions">
-                    <button class="btn-sm">삭제</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
-    
-    <div class="comment-section">
-    <h3>댓글</h3>
+        <hr>
 
-    <form id="commentForm" method="post">
-        <input type="hidden" name="board_idx" value="<?= $board_info->idx ?>">
-        <textarea name="comment" placeholder="댓글을 입력하세요" required></textarea>
-        <button type="submit">댓글 등록</button>
-    </form>
-
-    <hr>
-
-    <div id="comment_list"><!-- 댓글 리스트가 여기에 로드됩니다 --></div>
-    <button id="load_more_top_comments" data-page="1" style="display:none;">더보기</button>
-</div>
+        <div id="comment_list"><!-- 댓글 리스트가 여기에 로드됩니다 --></div>
+        <button id="load_more_top_comments" data-page="1" style="display:none;">더보기</button>
+    </div>
     
    
 </div>
@@ -97,62 +68,6 @@
 
 <script>
 
-//NOTE: 1차 구축
-//     $('#commentForm').on('submit', function(e) {
-//         e.preventDefault();
-
-//         var form = $(this)[0];
-//         var formData = new FormData(form);
-
-//         $.ajax({
-//             url: '<?= site_url("comment/create") ?>',
-//             type: 'POST',
-//             data: formData,
-//             processData: false, // FormData 사용 시 false
-//             contentType: false, // FormData 사용 시 false
-//             dataType: 'json',
-//             success: function(data) {
-//                 if (data.success) {
-
-//                     //컴포넌트로 처리
-//                     var commentItem = `
-//                         <div class="comment-item" data-id="${data.comment.id}">
-//                             <div class="comment-header">
-//                                 <span class="comment-author">${data.comment.author}</span>
-//                                 <span class="comment-date">${data.comment.date}</span>
-//                             </div>
-
-//                             <div class="comment-content">
-//                                 ${data.comment.content}
-//                             </div>
-
-//                             <div class="comment-actions">
-//                                 <button class="btn-sm delete-comment-btn" >답글 달기</button>
-//                                 <button class="btn-sm delete-comment-btn">삭제</button>
-//                             </div>
-
-//                             <form id="subCommentForm" method="post" hidden style="padding-top:10px">
-//                                 <input type="hidden" name="board_idx" value="<?= $board_info->idx ?>">
-//                                 <div class="form-group" style="margin-bottom:0px;">
-//                                     <textarea name="comment" placeholder="댓글을 입력하세요" required style="max-height: 100px;"></textarea>
-//                                 </div>
-//                                 <button type="submit">댓글 등록</button>
-//                             </form>
-//                         </div>
-//                     `;
-
-//                     $('#comment_list').append(commentItem);
-//                     $('#commentForm')[0].reset();
-//                 } else {
-//                     alert('댓글 등록 실패: ' + data.message);
-//                 }
-//             },
-//             error: function(xhr, status, error) {
-//                 console.error('AJAX 오류:', error);
-//                 alert('서버 오류 발생');
-//             }
-//         });
-//     });
 
     $(function () {
         const boardIdx = <?= json_encode($board_info->idx) ?>;
@@ -343,60 +258,127 @@
     background-color: #c82333;
 }
 
-/* 댓글 스타일 (추후 사용) */
+
+
+/* 댓글 전체 영역 */
 .comment-section {
-    border-top: 2px solid #dee2e6;
-    padding-top: 20px;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
 }
+
 .comment-section h3 {
+    margin-bottom: 15px;
+}
+
+/* 댓글 작성 폼 */
+#commentForm textarea {
+    width: 100%;
+    height: 80px;
+    resize: none;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+#commentForm button {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 댓글 아이템 */
+.comment-item {
+    border-left: 2px solid #ccc;
+    padding-left: 15px;
     margin-bottom: 20px;
 }
 
-.comment-count {
-    color: #6c757d;
-    font-size: 0.9em;
-}
-
-.comment-item {
-    padding: 15px;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    background-color: #f8f9fa;
-}
 .comment-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 0.9em;
-    color: #6c757d;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 5px;
 }
 
-.comment-author {
+.comment-header strong {
     font-weight: bold;
-    color: #495057;
 }
 
+.comment-header .meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #888;
+    font-size: 0.9em;
+}
+
+.delete-btn {
+    color: #999;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 2px 5px;
+}
+
+.delete-btn:hover {
+    color: red;
+}
+
+/* 댓글 내용 */
 .comment-content {
-    margin-bottom: 10px;
-    line-height: 1.6;
-}
-.comment-actions {
-    text-align: right;
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 5px 0 10px 0;
 }
 
-.btn-sm {
+/* 대댓글 등록폼 */
+.subCommentForm {
+    margin-top: 10px;
+}
+
+.subCommentForm textarea {
+    width: 100%;
+    max-height: 100px;
+    resize: none;
+    padding: 8px;
+    font-size: 13px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 5px;
+}
+
+.subCommentForm button {
     padding: 5px 10px;
-    font-size: 0.85em;
-    background-color: #6c757d;
+    font-size: 13px;
+    background-color: #555;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
-    margin-left: 5px;
 }
 
-.btn-sm:hover {
-    background-color: #5a6268;
+/* 버튼 */
+.reply-btn, .load-more-replies, #load_more_top_comments {
+    padding: 5px 10px;
+    font-size: 13px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 5px;
 }
+
+.reply-btn:hover, .load-more-replies:hover, #load_more_top_comments:hover {
+    background-color: #ddd;
+}
+
+
 </style>
