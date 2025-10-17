@@ -1,4 +1,4 @@
-<div class="comment-item" data-user_idx = <?=$comment['user_idx']?> data-idx="<?= $comment['idx'] ?>" data-depth="<?= $comment['depth'] ?>" style="margin-left: 30px; border-left: 1px solid #ccc; padding-left: 10px; margin-bottom: 10px;">
+<div class="comment-item" data-user_idx = <?=$comment['user_idx']?> data-idx="<?= $comment['idx'] ?>"  style=" border-left: 1px solid #ccc; padding-left: 10px; margin-bottom: 10px;">
     <div class="comment-header">
         <strong><?= htmlspecialchars($comment['author']) ?></strong>
         <div style="display:flex; gap:3px;">
@@ -31,7 +31,6 @@
     <?php if (!empty($comment['has_more_children'])): ?>
         <button class="load-more-replies" 
                 data-parent-idx="<?= $comment['idx'] ?>" 
-                data-depth="<?= $comment['depth'] + 1 ?>" 
                 data-page="1">
             더보기..
         </button>
