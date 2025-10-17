@@ -19,6 +19,11 @@ class Board extends MY_Controller
 
     }
 
+    private function get_category_list(){
+         $this->load->model("Category_model");
+         return $this->Category_model->get_all();
+    }
+
     //TODO: 본인 개시글인지 확인 매서드
     private function is_admin(){
 
@@ -32,7 +37,7 @@ class Board extends MY_Controller
         $limit = (int)$this->input->get('limit') ?: 10;
         $pages = (int)$this->input->get('pages') ?: 0;
         $search = $this->input->get('search') ?:null;
-
+        $category_idx= $this->input->get('category_idx') ?: 0;
 
 
         //FIXME: 게시글 등록/수정/삭제 후 SORTING 및 페이지네이션 코드 수정
@@ -40,13 +45,16 @@ class Board extends MY_Controller
         $this->load->model("Board_model");
 
         //게시글 리스트 반환 쿼리
-        $result = $this->Board_model->get_all($search, $limit, $pages);
+        $result = $this->Board_model->get_all($search, $limit, $pages ,$category_idx);
 
 
         //게시글 전채 갯수 반환 (페이지네이션용)
-        $count = $this->Board_model->get_all_count($search);
-    
+        $count = $this->Board_model->get_all_count($search,$category_idx);
         
+        //카테고리 리스트 송신
+        $data['categorys'] = $this->get_category_list();
+        $data['category_idx'] = $category_idx;
+
         $data["page_title"]='게시판';
         $data['content']= "board/list";
         $data['board_list'] = $result;
@@ -65,18 +73,23 @@ class Board extends MY_Controller
     //NOTE: 게시판 - 등록 페이지
     public function register(){
 
-
+       
+        
         //로그인 후 접근 가능하도록 차단
         if(!$this->is_login()){
             echo "
                 <script>
                     alert('로그인 후 이용해주십시오.');
                     history.back();
-                </script>";
+                </script>
+            ";
         }
+
 
         $data['page_title']= '게시글 등록';
         $data['content']= 'board/register';
+        $data['categorys'] = $this->get_category_list();
+
         $this->load->view( 'layout', $data );
     }
 
@@ -85,6 +98,7 @@ class Board extends MY_Controller
         //게시글 제목,내용
         $title = $this->input->post('title');
         $content = $this->input->post('content');
+        $category_idx = $this->input->post('category_idx');
 
         //세션 고객 idx정보
         $user = $this->session->userdata('user');
@@ -93,7 +107,7 @@ class Board extends MY_Controller
         $this->load->model("Board_model");
 
         //게시글 리스트 생성 쿼리
-        $this->Board_model->create($title, $content, $user->idx);
+        $this->Board_model->create($title, $content, $user->idx , $category_idx);
         
        
         redirect("board");
@@ -108,7 +122,7 @@ class Board extends MY_Controller
         //게시글 반환 쿼리
         $result = $this->Board_model->get_one($idx);
         
-
+        $data['categorys'] = $this->get_category_list();
         $data["page_title"]='게시판 수정페이지';
         $data['content']= "board/edit";
         $data["board_info"] = $result;
@@ -121,6 +135,8 @@ class Board extends MY_Controller
         //수정될 게시판 정보
         $title = $this->input->post("title");
         $content = $this->input->post("content");
+        $category_idx = $this->input->post('category_idx');
+
 
         //권한 확인
         $user = $this->session->userdata("user");
@@ -135,7 +151,6 @@ class Board extends MY_Controller
 
 
 
-        echo json_encode($board_one);
         // //존재하지 않는 게시글일때 알람 출력
         if(!$board_one){
            echo "
@@ -153,7 +168,7 @@ class Board extends MY_Controller
         }else{
 
             //게시글 수정 쿼리
-            $this->Board_model->update($title, $content, $idx);
+            $this->Board_model->update($title, $content, $idx, $category_idx);
             redirect("board");
         }
 
