@@ -21,7 +21,8 @@ class Comment_model extends CI_Model
                     user u ON c.user_idx = u.idx
                 WHERE
                     c.board_idx = ?
-                    AND c.depth = 0
+                    AND
+                    parent_idx IS NULL
                 ORDER BY
                     c.created_at ASC
                 LIMIT ? OFFSET ?
@@ -30,7 +31,6 @@ class Comment_model extends CI_Model
         );
 
         $comments = $query->result_array();
-
         // 각 댓글에 대해 자식 댓글 초기 세팅
         foreach ($comments as &$comment) {
             $children = $this->getRepliesTree($comment['idx'], $limit, 0);
@@ -48,7 +48,7 @@ class Comment_model extends CI_Model
             "
                 SELECT COUNT(idx) as count
                 FROM comments
-                WHERE board_idx = ? AND depth = 0
+                WHERE board_idx = ? AND parent_idx IS NULL
             ",
             array($board_idx)
         );
