@@ -3,10 +3,12 @@
     $posts = $board_list;
 
     $curr_page = $board_info->pages; //현재 페이지
-    $limit = $board_info->limit; //제한 수
+    $limit = $board_info->limit; //출력 개수
     $total = $board_info->total; //총 게시글 갯수
     $search = $board_info->search; //검색어
     $total_page = ceil($total / $limit); //총 페이지 수
+    $category_idx //선택된 카테고리 selectbox
+
 
 //     //FIXME: 임시 테스트
 //     $posts = array([
@@ -42,11 +44,25 @@
 
 
     <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
-        <form method="get" action="<?= base_url('board') ?>" style="display:flex; gap:5px">
-            <input style="padding: 10px 20px;" type="text" name="search" placeholder="제목을 입력하세요.">
-            <button type="submit">검색</button>
-        </form>
 
+        <div style="display:flex; gap:5px">
+            
+            
+            <form method="get" action="<?= base_url('board') ?>" style="display:flex; gap:5px">
+                <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="검색어 입력">
+                <select id="category_idx" name="category_idx">
+                    <option value="0" <?= ($category_idx == 0) ? 'selected' : '' ?>>전체</option>
+
+                    <?php foreach ($categorys as $category): ?>
+                        <option value="<?= $category->idx ?>" <?= ($category_idx == $category->idx) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($category->title) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>   
+                <button type="submit">검색</button>
+            </form>
+
+        </div>
         <div>
             <a href= "/board/register">
                 <button class="login-btn">등록</button>
@@ -103,7 +119,7 @@
         <ul>
             <?php for($i=0; $i<$total_page; $i++): ?>
                 <li class="<?= $i == $curr_page ? 'active' : '' ?>">
-                    <a href="<?= base_url('board?pages='.$i.'&limit='.$limit.'&search='.urlencode($search)) ?>">
+                    <a href="<?= base_url('board?pages='.$i.'&limit='.$limit.'&search='.urlencode($search)).'&category_idx='.$category_idx ?>">
                         <?= $i+1 ?>
                     </a>
                 </li>
@@ -114,9 +130,9 @@
     <form id="limitForm" method="get" action="<?= base_url('board') ?>">
         <!-- 유지할 검색어 파라미터 -->
         <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
-
+        <input type="hidden" name="category_idx" value="<?= $category_idx ?>">
         <label for="limit">출력 개수:</label>
-        <select name="limit" id="limit" onchange="document.getElementById('limitForm').submit()">
+        <select name="limit" id="limit"  onchange="document.getElementById('limitForm').submit()">
             <option value="5" <?= $limit == 5 ? 'selected' : '' ?>>5개</option>
             <option value="10" <?= $limit == 10 ? 'selected' : '' ?>>10개</option>
             <option value="20" <?= $limit == 20 ? 'selected' : '' ?>>20개</option>
