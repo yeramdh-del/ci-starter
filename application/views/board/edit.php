@@ -2,6 +2,18 @@
     <h2>게시글 수정</h2>
     
     <form action="/board/update/<?=$board_info->idx?>" method="post">
+
+        <div class="form-group" style=" display:flex; justify-content: space-between; padding: 10px 0px;">
+            <label for="category_idx" style="margin-bottom:0px;">카테고리</label>
+            <select id="category_idx" name="category_idx">
+                <?php foreach ($categorys as $category): ?>
+                        <option value="<?= $category->idx ?>" <?= ($board_info->category_idx == $category->idx) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($category->title) ?>
+                        </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
         <div class="form-group">
             <label for="title">제목</label>
             <input type="text" id="title" name="title" required placeholder="게시글 제목을 입력하세요" value="<?=$board_info->title?>">
