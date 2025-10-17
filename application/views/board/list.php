@@ -7,8 +7,17 @@
     $total = $board_info->total; //총 게시글 갯수
     $search = $board_info->search; //검색어
     $total_page = ceil($total / $limit); //총 페이지 수
-    $category_idx //선택된 카테고리 selectbox
+    
 
+
+    $page_block_size = 3; // 페이지 번호는 3개씩만 보이게
+    $start_page = max(0, $curr_page - floor($page_block_size / 2));
+    $end_page = $start_page + $page_block_size;
+
+    if ($end_page > $total_page) {
+        $end_page = $total_page;
+        $start_page = max(0, $end_page - $page_block_size);
+    }
 
 //     //FIXME: 임시 테스트
 //     $posts = array([
@@ -109,19 +118,39 @@
 </div>
 
 
-<!-- 
-    BUG: 페이지네이션 갯수 제안후 이전,다음 버튼 추가하기
- -->
+<!-- NOTE: 페이지네이션 -->
 <div class="pagination-container">
+    
     <nav>
-        <ul>
-            <?php for($i=0; $i<$total_page; $i++): ?>
+        <ul class="pagination">
+
+            <!-- 이전 블록 -->
+            <?php if ($start_page > 0): ?>
+                <li class="prev">
+                    <a href="<?= base_url('board?pages=' . ($start_page - 1) . '&limit=' . $limit . '&search=' . urlencode($search) . '&category_idx=' . $category_idx) ?>">
+                        &lt; 이전
+                    </a>
+                </li>
+            <?php endif; ?>
+
+            <!-- 페이지 번호 목록 -->
+            <?php for ($i = $start_page; $i < $end_page; $i++): ?>
                 <li class="<?= $i == $curr_page ? 'active' : '' ?>">
-                    <a href="<?= base_url('board?pages='.$i.'&limit='.$limit.'&search='.urlencode($search)).'&category_idx='.$category_idx ?>">
-                        <?= $i+1 ?>
+                    <a href="<?= base_url('board?pages=' . $i . '&limit=' . $limit . '&search=' . urlencode($search) . '&category_idx=' . $category_idx) ?>">
+                        <?= $i + 1 ?>
                     </a>
                 </li>
             <?php endfor; ?>
+
+            <!-- 다음 블록 -->
+            <?php if ($end_page < $total_page): ?>
+                <li class="next">
+                    <a href="<?= base_url('board?pages=' . $end_page . '&limit=' . $limit . '&search=' . urlencode($search) . '&category_idx=' . $category_idx) ?>">
+                        다음 &gt;
+                    </a>
+                </li>
+            <?php endif; ?>
+
         </ul>
     </nav>
 
@@ -164,4 +193,28 @@
     li{
         display: inline-block;
     }
+    .pagination {
+        display: flex;
+        gap: 4px;
+        padding: 0;
+        list-style: none;
+    }
+
+    .pagination li a {
+        padding: 4px 8px;
+        text-decoration: none;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        color: #333;
+    }
+
+    .pagination li.active a {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .pagination li a:hover {
+        background-color: #eaeaea;
+    }
 </style>
+
