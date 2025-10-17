@@ -21,8 +21,8 @@
             
            <?php if ($user): ?>
                 <!-- FIXME: 로그인 유무 확인용 -->
-                <div style="display: flex; gap:2px; ">
-                    <p ><?php echo $user->name?>님 환영합니다.</p>
+                <div style="display: flex; gap: 2px; align-items: center;">
+                    <span><?php echo $user->name ?>님 환영합니다.</span>
                     <a href="/auth/logout"><button class="login-btn">로그아웃</button></a>
                 </div>
                 <?php else: ?>
