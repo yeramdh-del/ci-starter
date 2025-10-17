@@ -20,27 +20,31 @@ class Board_model extends MY_Model{
         //  - 페이지당 표시될 갯수 지정
         $select_query= "
             SELECT
-                board.*,
+                b.*,
                 user.name as author
             FROM
-                board
-                    left join user
-                    ON board.user_idx = user.idx
+                board AS b
+                left join user
+                ON b.user_idx = user.idx
+                LEFT JOIN categorys c
+                ON b.category_idx = c.idx
             WHERE 
-                title LIKE '%$search%'
+                b.title LIKE '%$search%'
+                AND
+                c.is_used = true
             ";
             
             //카테고리별 조건 추가
             if($category_idx != 0){
                 $select_query.= "
                 AND
-                category_idx = '$category_idx'
+                b.category_idx = '$category_idx'
                 ";
             }
 
             $select_query.= "
                 ORDER BY
-                    created_at DESC
+                    b.created_at DESC
                 LIMIT ?
                 OFFSET ?
             ";
@@ -56,17 +60,22 @@ class Board_model extends MY_Model{
     public function get_all_count($search=null, $category_idx){
         $select_query= "
             SELECT
-                COUNT(idx) AS total
+                COUNT(b.idx) AS total
             FROM 
-                board
-            WHERE title LIKE '%$search%'
+                board AS b
+                LEFT JOIN categorys c
+                ON b.category_idx = c.idx
+            WHERE
+                b.title LIKE '%$search%'
+                AND
+                c.is_used = true
             ";
 
             //카테고리별 조건 추가
             if($category_idx != 0){
                 $select_query.= "
                 AND
-                category_idx = '$category_idx'
+                b.category_idx = '$category_idx'
                 ";
             }
 
@@ -111,6 +120,8 @@ class Board_model extends MY_Model{
                 ON b.category_idx = c.idx
             WHERE
                 b.idx = ?
+                AND
+                c.is_used = true
         ";
          $query = $this->db->query($query_text,array($idx));
         return $query->row();
