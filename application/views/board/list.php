@@ -90,12 +90,10 @@
         <tbody>
             <?php if(!empty($posts)): ?>
                 <?php foreach($posts as $post): ?>
-                    <tr>
+                    <tr class="clickable-row" data-href="<?php echo site_url('board/detail/' . $post->idx); ?>">
                         <td class="col-idx"><?php echo $post->idx; ?></td>
                         <td class="col-title">
-                            <a href="<?php echo site_url('board/detail/' . $post->idx); ?>">
-                                <?php echo $post->title; ?>
-                            </a>
+                            <?php echo $post->title; ?>
                         </td>
                         <td class="col-author"><?php echo $post->author; ?></td>
                         <td class="col-date"><?php echo $post->created_at; ?></td>
@@ -141,6 +139,20 @@
     </form>
 </div>
 
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const rows = document.querySelectorAll('.clickable-row');
+        rows.forEach(row => {
+            row.addEventListener('click', function () {
+                const href = this.dataset.href;
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>
 
 <style>
     .pagination-container{
