@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 //NOTE: 비동기 매서드 response값 form 통일 필요
-class CommentController extends CI_Controller
+class Comment extends CI_Controller
 {
 
     const MAX_LIST_NUMBER = 3; //NOTE: 최대 댓글 입력 갯수

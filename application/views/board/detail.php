@@ -75,7 +75,7 @@
         // 최상위 댓글 불러오기 함수 (페이지네이션 용 더보기)
         function loadTopComments(page = 1) {
             $.ajax({
-                url: '<?= site_url("CommentController/load_top_comments") ?>',
+                url: '<?= site_url("Comment/load_top_comments") ?>',
                 method: 'GET',
                 data: { board_idx: boardIdx, page: page },
                 dataType: 'json',
@@ -110,7 +110,7 @@
             const formData = new FormData(this);
 
             $.ajax({
-                url: '<?= site_url("CommentController/create") ?>',
+                url: '<?= site_url("Comment/create") ?>',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -152,7 +152,7 @@
             formData.append('depth', depth);
 
             $.ajax({
-                url: '<?= site_url("CommentController/create") ?>',
+                url: '<?= site_url("Comment/create") ?>',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -185,7 +185,7 @@
             const commentUserIdx = commentItem.data('user_idx');
             
             $.ajax({
-                url: '<?= site_url("CommentController/delete") ?>',
+                url: '<?= site_url("Comment/delete") ?>',
                 method : 'POST',
                 data:  {
                     user_idx : commentUserIdx,
@@ -215,7 +215,7 @@
             const page = $btn.data('page');
 
             $.ajax({
-                url: '<?= site_url("CommentController/load_replies") ?>',
+                url: '<?= site_url("Comment/load_replies") ?>',
                 method: 'GET',
                 data: { parent_idx: parentIdx, page: page },
                 dataType: 'json',
