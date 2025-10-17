@@ -75,7 +75,7 @@ class CommentController extends CI_Controller
             'board_idx'  => $this->input->post('board_idx'),
             'parent_idx'  => $this->input->post('parent_idx') ?: null,
             'depth'      => (int) $this->input->post('depth') ?: 0,
-            'user_idx'     => $this->session->userdata('user') ? $this->session->userdata('user')->idx : '익명',
+            'user_idx'     => $this->session->userdata('user')->idx,
             'content'    => $this->input->post('comment'),
             'created_at' => date('Y-m-d H:i:s'),
         ];
