@@ -23,11 +23,11 @@
             <input type="password" id="password_confirm" name="password_confirm" required>
         </div>
 
-        <button type="submit" class="submit">회원가입</button>
+        <button type="submit" class="submit" >회원가입</button>
     </form>
 
     <div class="form-footer">
-        <p>이미 계정이 있으신가요? <a href="/auth/login">로그인</a></p>
+        <p>이미 계정이 있으신가요? <a href="/auth/login" style="color: #007bff; text-decoration: none;">로그인</a></p>
     </div>
 </div>
 
