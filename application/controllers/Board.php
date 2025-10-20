@@ -185,6 +185,14 @@ class Board extends MY_Controller
         $result = $this->Board_model->get_one($idx);
 
 
+        if(!$result){
+            echo    " 
+                    <script>
+                        alert('존재하지 않는 게시글입니다.');
+                        location.href = '" . base_url('board') . "';
+                    </script>";
+        }
+
         $data["page_title"]='게시판 상세페이지';
         $data['content']= "board/detail";
         $data["board_info"] = $result;
