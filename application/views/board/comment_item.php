@@ -1,4 +1,5 @@
-<div class="comment-item" 
+<!-- NOTE: 현재 사용 X -->
+<!-- <div class="comment-item" 
     data-user_idx="<?= $comment['user_idx'] ?>" 
     data-idx="<?= $comment['idx'] ?>"
     data-depth="<?= $comment['depth'] ?>"
@@ -43,4 +44,4 @@
     <?php endif; ?>
 </div>
 
-
+ -->
