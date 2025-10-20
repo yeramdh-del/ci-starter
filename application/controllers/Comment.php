@@ -45,20 +45,16 @@ class Comment extends CI_Controller
         
         $has_more = ($offset + $limit) < $total;
 
-        $html = '';
-        foreach ($top_comments as $comment) {
-            $html .= $this->load->view('/board/comment_item', ['comment' => $comment], true);
-        }
 
         echo json_encode([
             'success' => true,
-            'html' => $html,
+            'top_comments' => $top_comments,
             'has_more' => $has_more
         ]);
     }
 
     // NOTE: 댓글 - 등록
-    public function create()
+    public function add()
     {
         if(!$this->is_login()){
              echo json_encode([
@@ -76,24 +72,31 @@ class Comment extends CI_Controller
             'parent_idx'  => $this->input->post('parent_idx') ?: null,
             'depth'      => (int) $this->input->post('depth') ?: 0,
             'user_idx'     => $this->session->userdata('user')->idx,
-            'content'    => $this->input->post('comment'),
-            'created_at' => date('Y-m-d H:i:s'),
+            'content'    => $this->input->post('comment')
         ];
 
         $result = $this->Comment_model->insert($data);
+    
+         $result;
+    
 
-        echo json_encode(['success' => $result]);
+        echo json_encode([
+            'success' => true,
+            "comment" => $result
+        ]);
     }
 
     // NOTE: 댓글 - 삭제
     public function delete(){
         $this->load->model('Comment_model');
-        $author_idx = $this->input->post('user_idx');
+        // $author_idx = $this->input->post('user_idx');
         $idx = $this->input->post('idx');
         $user = $this->session->userdata('user');
 
+
+        $comment = $this->Comment_model->get_by_id($idx);
         
-        if($user->idx != $author_idx){
+        if($user->idx != $comment->user_idx){
              echo json_encode([
             'success' => false,
             'data' => null,
@@ -123,19 +126,15 @@ class Comment extends CI_Controller
 
         $this->load->model('Comment_model');
 
-        $replies = $this->Comment_model->getRepliesTree($parent_idx, $limit, $offset);
+        $children = $this->Comment_model->getRepliesTree($parent_idx, $limit, $offset);
         $total   = $this->Comment_model->countReplies($parent_idx);
 
         $has_more = ($offset + $limit) < $total;
 
-        $html = '';
-        foreach ($replies as $reply) {
-            $html .= $this->load->view('/board/comment_item', ['comment' => $reply], true);
-        }
 
         echo json_encode([
             'success' => true,
-            'html' => $html,
+            'children' => $children,
             'has_more' => $has_more
         ]);
     }

@@ -5,11 +5,27 @@ class Comment_model extends CI_Model
 {
     protected $table = 'comments';
 
+
+    //댓글 정보 가져오기
+    public function get_by_id($idx){
+        $query = $this->db->query(
+            "
+                SELECT
+                    *                    
+                FROM
+                    comments
+                WHERE
+                    idx = ?
+            ",
+        array($idx));
+
+        return $query->row();
+    }
+
     // 최상위 댓글 가져오기 (depth = 0)
     public function get_top_level_comments($board_idx, $limit, $offset)
     {
 
-        
         $query = $this->db->query(
             "
                 SELECT
@@ -105,7 +121,26 @@ class Comment_model extends CI_Model
     // 댓글 삽입
     public function insert($data)
     {
-        return $this->db->insert($this->table, $data);
+        //NOTE: 안정성을 위해 트랙잭션 생성 후 처리
+        $this->db->trans_start();
+        
+        // INSERT
+        $this->db->insert('comments', $data);
+        $insert_id = $this->db->insert_id();
+        
+        // SELECT
+        $comment = null;
+        if ($insert_id) {
+            $comment = $this->get_by_id($insert_id);
+        }
+        
+        $this->db->trans_complete();
+        
+        if ($this->db->trans_status() === FALSE) {
+            return false;
+        }
+        
+        return $comment;
     }
 
     //댓글 삭제
