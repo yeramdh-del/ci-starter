@@ -11,11 +11,16 @@ class Comment_model extends CI_Model
         $query = $this->db->query(
             "
                 SELECT
-                    *                    
+                    c.*,
+                    u.name AS author                    
                 FROM
-                    comments
+                        comments AS c
+                    LEFT JOIN
+                        user AS u
+                    ON
+                        c.user_idx = u.idx
                 WHERE
-                    idx = ?
+                    c.idx = ?
             ",
         array($idx));
 
