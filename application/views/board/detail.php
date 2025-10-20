@@ -56,7 +56,7 @@
             <button type="submit">댓글 등록</button>
         </form>
 
-        <hr>
+        <hr style="margin: 10px 0px 0px 0px;">
 
         <div id="comment_list"><!-- 댓글 리스트가 여기에 로드됩니다 --></div>
         <button id="load_more_top_comments" data-page="1" style="display:none;">더보기</button>
@@ -95,13 +95,14 @@
             const childrenHTML = comment.children && comment.children.length > 0 ? 
                 comment.children.map(child => createCommentHTML(child)).join('') : '';
             
-            const loadMoreBtn = comment.has_more_children ? 
-                `<button class="load-more-replies" 
-                        data-parent-idx="${comment.idx}" 
-                        data-depth="${comment.depth + 1}" 
-                        data-page="1">
-                    더보기..
-                </button>` : '';
+        const loadMoreBtn = `
+            <button class="load-more-replies" 
+                    data-parent-idx="${comment.idx}" 
+                    data-depth="${comment.depth + 1}" 
+                    data-page="1"
+                    ${comment.has_more_children ? '' : 'disabled'}>
+                더보기..
+            </button>`;
 
             return `
                 <div class="comment-item" 
@@ -118,8 +119,19 @@
                     <div class="comment-content">
                         ${nl2br(comment.content)}
                     </div>
-                    <button class="reply-btn" type="button">답글 달기</button>
-                    
+
+                    <div style="display:flex;">
+                        <button class="reply-btn" type="button">답글 달기</button>
+                        <button class="load-more-replies" 
+                            data-parent-idx="${comment.idx}" 
+                            data-depth="${comment.depth + 1}" 
+                            data-page="1"
+                            ${comment.has_more_children ? '' : 'disabled'}>
+                            더보기..
+                        </button>
+                    </div>
+
+
                     <form class="subCommentForm" method="post" hidden>
                         <input type="hidden" name="board_idx" value="${comment.board_idx}">
                         <input type="hidden" name="parent_idx" value="${comment.idx}">
@@ -130,7 +142,6 @@
                     <div class="children-comments">
                         ${childrenHTML}
                     </div>
-                    ${loadMoreBtn}
                 </div>
             `;
         }
@@ -278,7 +289,7 @@
 
         // 답글 달기 버튼 클릭
         $(document).on('click', '.reply-btn', function() {
-            const $form = $(this).siblings('.subCommentForm');
+            const $form =  $(this).closest('.comment-item').find('> .subCommentForm');
             $form.toggle();
             
             if ($form.is(':visible')) {
@@ -286,8 +297,7 @@
             }
         });
 
-
-        // 답글 등록 폼 제출
+          // 답글 등록 폼 제출
         $(document).on('submit', '.subCommentForm', function(e) {
             e.preventDefault();
             const $form = $(this);
@@ -300,18 +310,19 @@
                 dataType: 'json',
                 success: function(res) {
                     if (res.success) {
-                        
-                        // 새 댓글 HTML 생성
-                        const newCommentHTML = createCommentHTML(res.comment);
-                        
-                        // 부모 댓글의 children-comments에 추가
-                        $form.siblings('.children-comments').append(newCommentHTML);
+
+                        // const newCommentHTML = createCommentHTML(res.comment);
+                        // $childrenContainer.append(newCommentHTML);
+
+                        // 전체 댓글 리로드
+                        $('#comment_list').empty();
+                        $('#load_more_top_comments').hide();
+                        loadTopComments(1);
+        
                         
                         // 폼 초기화 및 숨김
                         $form[0].reset();
                         $form.hide();
-                        
-                        alert('답글이 등록되었습니다.');
                     } else {
                         alert(res.message || '답글 등록 실패');
                     }
@@ -321,6 +332,7 @@
                 }
             });
         });
+
 
         // 댓글 삭제
         $(document).on('click', '.delete-btn', function() {
@@ -339,7 +351,7 @@
                         $commentItem.fadeOut(300, function() {
                             $(this).remove();
                         });
-                        alert('댓글이 삭제되었습니다.');
+                        // alert('댓글이 삭제되었습니다.');
                     } else {
                         alert(res.message || '댓글 삭제 실패');
                     }
@@ -410,7 +422,7 @@
 .comment-item {
     border-left: 2px solid #ccc;
     padding-left: 15px;
-    /* margin-bottom: 20px; */
+    
 }
 
 .comment-header {
@@ -431,6 +443,7 @@
     gap: 10px;
     color: #888;
     font-size: 0.9em;
+
 }
 
 .delete-btn {
@@ -449,6 +462,8 @@
     font-size: 14px;
     line-height: 1.4;
     margin: 5px 0 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
 }
 
 /* 대댓글 등록폼 */
