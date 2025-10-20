@@ -23,7 +23,7 @@
             <input type="password" id="password_confirm" name="password_confirm" required>
         </div>
 
-        <button type="submit" class="submit" >회원가입</button>
+        <button type="submit" class="btn-primary"  style="width: 100%; cursor: pointer;">회원가입</button>
     </form>
 
     <div class="form-footer">
@@ -46,17 +46,5 @@
         text-align: center;
         margin-bottom: 30px;
     }
-
-     .submit{
-        width: 100%;
-        padding: 12px; 
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        cursor: pointer;
-    }
-
 
 </style>

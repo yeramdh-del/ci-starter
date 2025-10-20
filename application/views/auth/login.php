@@ -12,7 +12,7 @@
             <input type="password" id="password" name="password" required >
         </div>
 
-        <button type="submit" class="login" >로그인</button>
+        <button type="submit" class="btn-primary" style="width: 100%; cursor: pointer;" >로그인</button>
     </form>
 
     <div style="text-align: center; margin-top: 20px;">
@@ -34,19 +34,6 @@
     .title{
         text-align: center;
         margin-bottom: 30px;
-    }
-
-
-    
-    .login{
-        width: 100%;
-        padding: 12px; 
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        cursor: pointer;
     }
 
 </style>
