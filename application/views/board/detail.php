@@ -230,7 +230,7 @@
         // 초기 최상위 댓글 로드
         loadTopComments(1);
 
-                // 최상위 댓글 등록
+        // 최상위 댓글 등록
         $('#commentForm').on('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -244,7 +244,6 @@
                 dataType: 'json',
                 success: function(res) {
                     if (res.success) {
-                        // alert('댓글이 등록되었습니다.');
                         $('#comment_list').empty();
                         $('#load_more_top_comments').hide();
                         loadTopComments();
@@ -305,7 +304,6 @@
                         // 새 댓글 HTML 생성
                         const newCommentHTML = createCommentHTML(res.comment);
                         
-                        console.log(newCommentHTML);
                         // 부모 댓글의 children-comments에 추가
                         $form.siblings('.children-comments').append(newCommentHTML);
                         
@@ -330,7 +328,7 @@
             
             const $commentItem = $(this).closest('.comment-item');
             const commentIdx = $commentItem.data('idx');
-            console.log($(this));
+
             $.ajax({
                 url: '<?= site_url("Comment/delete") ?>',
                 method: 'POST',
