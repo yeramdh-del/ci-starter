@@ -102,7 +102,9 @@
                     <tr class="clickable-row" data-href="<?php echo site_url('board/detail/' . $post->idx); ?>">
                         <td class="col-idx"><?php echo $post->idx; ?></td>
                         <td class="col-title">
-                            <?= nl2br(htmlspecialchars($post->title)) ?>
+                            <strong style="font-size: 13px; color: #007bff;">[<?= $post->category_title?>]</strong>
+                            <?= nl2br(htmlspecialchars($post->title))?>
+                           
                         </td>
                         <td class="col-author"><?php echo $post->author; ?></td>
                         <td class="col-date"><?php echo $post->created_at; ?></td>

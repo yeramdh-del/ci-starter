@@ -22,6 +22,7 @@
         <div class="form-group">
             <label>제목</label>
             <div class="post-content">
+                <strong style="font-size: 13px; color: #007bff;">[<?= $board_info->category_title?>]</strong>
                 <?= nl2br(htmlspecialchars($board_info->title)) ?>
             </div>
         </div>

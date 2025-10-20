@@ -21,7 +21,8 @@ class Board_model extends MY_Model{
         $select_query= "
             SELECT
                 b.*,
-                user.name as author
+                user.name as author,
+                c.title AS category_title
             FROM
                 board AS b
                 left join user
