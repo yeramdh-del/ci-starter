@@ -1,21 +1,18 @@
+
 <!-- jQuery CDN 추가 -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
 <div class="post_box">
-
     <div style="display: flex; justify-content:space-between">
         <h2>게시글 상세</h2>
 
-
         <!-- 본인 계정에서만 수정 삭제 가능하도록 설정 -->
-        <?php if( $this->session->userdata('user') && $this->session->userdata('user')->name == $board_info->author): ?>
+        <?php if($this->session->userdata('user') && $this->session->userdata('user')->name == $board_info->author): ?>
         <div style="display:flex; gap:2px;">
             <a href="/board/edit/<?= $board_info->idx ?>" class="btn-primary">수정</a>
             <a href="/board/delete/<?= $board_info->idx ?>" class="btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
         </div>
         <?php endif;?>
-
     </div>
     
     <div class="post-detail">
@@ -38,7 +35,6 @@
             <label>내용</label>
             <div class="post-content content-area">
                 <?= nl2br(htmlspecialchars($board_info->content)) ?>
-                
             </div>
         </div>
 
@@ -51,6 +47,7 @@
     <div class="comment-section">
         <h3>댓글</h3>
 
+        <!-- 최상위 댓글 작성 폼 -->
         <form id="commentForm" method="post">
             <input type="hidden" name="board_idx" value="<?= $board_info->idx ?>">
             <textarea name="comment" placeholder="댓글을 입력하세요" required></textarea>
@@ -59,310 +56,240 @@
 
         <hr style="margin: 10px 0px 0px 0px;">
 
-        <div id="comment_list"><!-- 댓글 리스트가 여기에 로드됩니다 --></div>
-        <button id="load_more_top_comments" data-page="1" style="display:none;">더보기</button>
+        <!-- 댓글 리스트 -->
+        <div id="comment_list"></div>
+
+        <!-- 페이지 네이션 -->
+         <div id="pagination"></div>
     </div>
-    
-   
 </div>
 
-
 <script>
-    $(function () {
-        const boardIdx = <?= json_encode($board_info->idx) ?>;
+$(function () {
+    const boardIdx = <?= json_encode($board_info->idx) ?>;
+    const currentUser = <?= json_encode($this->session->userdata('user') ? $this->session->userdata('user')->name : null) ?>;
+    let currentPage = 0;
+    const limit = 10; // 서버에서 설정한 MAX_LIST_NUMBER와 동일해야 함
 
-        //NOTE: 방어코드
-        // XSS 방지 함수
-        function escapeHtml(text) {
-            if (!text) return '';
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return String(text).replace(/[&<>"']/g, m => map[m]);
-        }
+    // XSS 방지 함수
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
 
-        // 줄바꿈 처리
-        function nl2br(text) {
-            if (!text) return '';
-            return escapeHtml(text).replace(/\n/g, '<br>');
-        }
+    // 줄바꿈 처리
+    function nl2br(text) {
+        if (!text) return '';
+        return escapeHtml(text).replace(/\n/g, '<br>');
+    }
 
-        // 댓글 HTML 생성 함수
-        function createCommentHTML(comment) {
-            const childrenHTML = comment.children && comment.children.length > 0 ? 
-                comment.children.map(child => createCommentHTML(child)).join('') : '';
-            
-        const loadMoreBtn = `
-            <button class="load-more-replies" 
-                    data-parent-idx="${comment.idx}" 
-                    data-depth="${comment.depth + 1}" 
-                    data-page="1"
-                    ${comment.has_more_children ? '' : 'disabled'}>
-                더보기..
-            </button>`;
-
-            return `
-                <div class="comment-item" 
-                    data-user_idx="${comment.user_idx}" 
-                    data-idx="${comment.idx}" 
-                    data-depth="${comment.depth}">
-                    <div class="comment-header">
+    // 댓글 HTML 생성 함수
+    function createCommentHTML(comment) {
+        const indent = comment.depth * 15; // depth에 따라 30px씩 들여쓰기
+        const isAuthor = currentUser && currentUser === comment.author;
+        
+        let html = `
+            <div class="comment-item" data-idx="${comment.idx}" style="margin-left: ${indent}px;">
+                <div class="comment-header">
+                    <div>
                         <strong>${escapeHtml(comment.author)}</strong>
-                        <div class="meta">
-                            <span>${escapeHtml(comment.created_at)}</span>
-                            <div class="delete-btn">X</div>
-                        </div>
+                        ${comment.depth > 0 ? '<span class="reply-badge">↳</span>' : ''}
                     </div>
-                    <div class="comment-content">
-                        ${nl2br(comment.content)}
-                    </div>
-
-                    <div style="display:flex;">
-                        <button class="reply-btn" type="button">답글 달기</button>
-                        <button class="load-more-replies" 
-                            data-parent-idx="${comment.idx}" 
-                            data-depth="${comment.depth + 1}" 
-                            data-page="1"
-                            ${comment.has_more_children ? '' : 'disabled'}>
-                            더보기..
-                        </button>
-                    </div>
-
-
-                    <form class="subCommentForm" method="post" hidden>
-                        <input type="hidden" name="board_idx" value="${comment.board_idx}">
-                        <input type="hidden" name="parent_idx" value="${comment.idx}">
-                        <textarea name="comment" placeholder="답글을 입력하세요" required></textarea>
-                        <button type="submit">등록</button>
-                    </form>
-                    
-                    <div class="children-comments">
-                        ${childrenHTML}
+                    <div class="meta">
+                        <span>${comment.created_at}</span>
+                        ${isAuthor ? `<span class="delete-btn" data-idx="${comment.idx}">삭제</span>` : ''}
                     </div>
                 </div>
-            `;
-        }
+                <div class="comment-content">
+                    <p>${nl2br(comment.content)}</p>
+                </div>
+                <button class="reply-btn" data-idx="${comment.idx}" data-root="${comment.root_parent_idx || comment.idx}" data-depth="${comment.depth}">
+                    답글 달기
+                </button>
+                
+                <!-- 답글 작성 폼 -->
+                <form class="subCommentForm" style="display:none;">
+                    <input type="hidden" name="board_idx" value="${boardIdx}">
+                    <input type="hidden" name="parent_idx" value="${comment.idx}">
+                    <input type="hidden" name="root_parent_idx" value="${comment.root_parent_idx || comment.idx}">
+                    <textarea name="comment" placeholder="답글을 입력하세요" required></textarea>
+                    <button type="submit">답글 등록</button>
+                    <button type="button" class="cancel-reply-btn">취소</button>
+                </form>
+            </div>
+        `;
+        
+        return html;
+    }
 
-        // 최상위 댓글 불러오기 함수
-        function loadTopComments(page = 1) {
-            $.ajax({
-                url: '<?= site_url("Comment/load_top_comments") ?>',
-                method: 'GET',
-                data: { 
-                    board_idx: boardIdx, 
-                    page: page 
-                },
-                dataType: 'json',
-                beforeSend: function() {
-                    $('#load_more_top_comments').prop('disabled', true).text('로딩중...');
-                },
-                success: function(res) {
-                    if (res.success) {
-                        let html = '';
-                        res.top_comments.forEach(comment => {
-                            html += createCommentHTML(comment);
-                        });
-                        
-                        $('#comment_list').append(html);
-                        
-                        if (res.has_more) {
-                            $('#load_more_top_comments')
-                                .data('page', page + 1)
-                                .prop('disabled', false)
-                                .text('더보기')
-                                .show();
-                        } else {
-                            $('#load_more_top_comments').hide();
-                        }
-                    } else {
-                        alert(res.message || '댓글 불러오기 실패');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert('서버 오류 발생');
-                    $('#load_more_top_comments').prop('disabled', false).text('더보기');
+    // 전체 댓글 불러오기
+    function loadAllComments(pages = 0 ) {
+        $.ajax({
+            url: '<?= site_url("V2_comment/get_list") ?>',
+            method: 'GET',
+            data: { board_idx: boardIdx , pages:pages },
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    let html = '';
+                    res.comments.forEach(comment => {
+                        html += createCommentHTML(comment);
+                    });
+                    $('#comment_list').html(html);
+
+                    // 페이지네이션 생성
+                    const total = res.comment_info.total;
+                    const limit = res.comment_info.limit;
+                    const totalPages = Math.ceil(total / limit);
+
+                    generatePagination(totalPages, pages);
+                    currentPage = pages;
+                } else {
+                    $('#comment_list').html('<p style="text-align:center; color:#999;">댓글이 없습니다.</p>');
                 }
-            });
-        }
-
-        // 대댓글 더보기 함수
-        function loadMoreReplies(parentIdx, depth, page, $button) {
-            $.ajax({
-                url: '<?= site_url("Comment/load_replies") ?>',
-                method: 'GET',
-                data: {
-                    parent_idx: parentIdx,
-                    depth: depth,
-                    page: page
-                },
-                dataType: 'json',
-                beforeSend: function() {
-                    $button.prop('disabled', true).text('로딩중...');
-                },
-                success: function(res) {
-                    if (res.success) {
-                        let html = '';
-                        res.children.forEach(child => {
-                            html += createCommentHTML(child);
-                        });
-                        
-                        // 대댓글을 부모 댓글의 children-comments 영역에 추가
-                        $button.closest('.comment-item')
-                            .find('> .children-comments')
-                            .append(html);
-                        
-                        if (res.has_more) {
-                            // 다음 페이지로 업데이트
-                            $button
-                                .data('page', page + 1)
-                                .prop('disabled', false)
-                                .text('더보기..');
-                        } else {
-                            // 더 이상 댓글이 없으면 버튼 제거
-                            $button.remove();
-                        }
-                    } else {
-                        alert(res.message || '답글 불러오기 실패');
-                        $button.prop('disabled', false).text('더보기..');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert('서버 오류 발생');
-                    $button.prop('disabled', false).text('더보기..');
-                }
-            });
-        }
-
-        // 초기 최상위 댓글 로드
-        loadTopComments(1);
-
-        // 최상위 댓글 등록
-        $('#commentForm').on('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-
-            $.ajax({
-                url: '<?= site_url("Comment/add") ?>',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                dataType: 'json',
-                success: function(res) {
-                    if (res.success) {
-                        $('#comment_list').empty();
-                        $('#load_more_top_comments').hide();
-                        loadTopComments();
-                        $('#commentForm')[0].reset();
-                    } else {
-                        alert(res.message);
-                    }
-                },
-                error: function() {
-                    alert('서버 오류 발생');
-                }
-            });
-        });
-
-
-
-        // 최상위 댓글 더보기 버튼 클릭
-        $('#load_more_top_comments').on('click', function() {
-            const page = $(this).data('page') || 1;
-            loadTopComments(page);
-        });
-
-        // 대댓글 더보기 버튼 클릭 (동적 요소용 이벤트 위임)
-        $(document).on('click', '.load-more-replies', function() {
-            const $button = $(this);
-            const parentIdx = $button.data('parent-idx');
-            const depth = $button.data('depth');
-            const page = $button.data('page') || 1;
-            
-            loadMoreReplies(parentIdx, depth, page, $button);
-        });
-
-        // 답글 달기 버튼 클릭
-        $(document).on('click', '.reply-btn', function() {
-            const $form =  $(this).closest('.comment-item').find('> .subCommentForm');
-            $form.toggle();
-            
-            if ($form.is(':visible')) {
-                $form.find('textarea').focus();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('댓글을 불러오는데 실패했습니다.');
             }
         });
+    }
 
-          // 답글 등록 폼 제출
-        $(document).on('submit', '.subCommentForm', function(e) {
-            e.preventDefault();
-            const $form = $(this);
-            const formData = $form.serialize();
-            
-            $.ajax({
-                url: '<?= site_url("Comment/add") ?>',
-                method: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function(res) {
-                    if (res.success) {
 
-                        // const newCommentHTML = createCommentHTML(res.comment);
-                        // $childrenContainer.append(newCommentHTML);
 
-                        // 전체 댓글 리로드
-                        $('#comment_list').empty();
-                        $('#load_more_top_comments').hide();
-                        loadTopComments(1);
-        
-                        
-                        // 폼 초기화 및 숨김
-                        $form[0].reset();
-                        $form.hide();
-                    } else {
-                        alert(res.message || '답글 등록 실패');
-                    }
-                },
-                error: function() {
-                    alert('서버 오류 발생');
+    // 페이지네이션 버튼 생성 함수
+    function generatePagination(totalPages, currentPage) {
+        let paginationHtml = '';
+
+        if (totalPages <= 1) {
+            $('#pagination').empty();
+            return;
+        }
+
+        // 이전 버튼
+        if (currentPage > 0) {
+            paginationHtml += `<button class="pagination-btn" data-page="${currentPage - 1}">« 이전</button> `;
+        }
+
+        // 페이지 번호 버튼
+        for (let i = 0; i < totalPages; i++) {
+            if (i === currentPage) {
+                paginationHtml += `<button style="font-weight:bold;" disabled>${i + 1}</button> `;
+            } else {
+                paginationHtml += `<button class="pagination-btn" data-page="${i}">${i + 1}</button> `;
+            }
+        }
+
+        // 다음 버튼
+        if (currentPage < totalPages - 1) {
+            paginationHtml += `<button class="pagination-btn" data-page="${currentPage + 1}">다음 »</button>`;
+        }
+
+        $('#pagination').html(paginationHtml);
+    }
+    // 페이지네이션 버튼 클릭 처리
+    $(document).on('click', '.pagination-btn', function() {
+        const page = $(this).data('page');
+        loadAllComments(page);
+    });
+
+
+    // 초기 댓글 로드
+    loadAllComments();
+
+    // 최상위 댓글 등록
+    $('#commentForm').on('submit', function(e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+
+        $.ajax({
+            url: '<?= site_url("V2_comment/add") ?>',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    loadAllComments();
+                    $('#commentForm')[0].reset();
+                } else {
+                    alert(res.message || '댓글 등록 실패');
                 }
-            });
-        });
-
-
-        // 댓글 삭제
-        $(document).on('click', '.delete-btn', function() {
-            if (!confirm('댓글을 삭제하시겠습니까?')) return;
-            
-            const $commentItem = $(this).closest('.comment-item');
-            const commentIdx = $commentItem.data('idx');
-
-            $.ajax({
-                url: '<?= site_url("Comment/delete") ?>',
-                method: 'POST',
-                data: { idx: commentIdx , page:$(this).data('page')},
-                dataType: 'json',
-                success: function(res) {
-                    if (res.success) {
-                        $commentItem.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                        // alert('댓글이 삭제되었습니다.');
-                    } else {
-                        alert(res.message || '댓글 삭제 실패');
-                    }
-                },
-                error: function() {
-                    alert('서버 오류 발생');
-                }
-            });
+            },
+            error: function() {
+                alert('서버 오류 발생');
+            }
         });
     });
+
+    // 답글 달기 버튼 클릭
+    $(document).on('click', '.reply-btn', function() {
+        // 다른 답글 폼 모두 숨김
+        $('.subCommentForm').hide();
+        
+        const $form = $(this).siblings('.subCommentForm');
+        $form.show();
+        $form.find('textarea').focus();
+    });
+
+    // 답글 취소 버튼
+    $(document).on('click', '.cancel-reply-btn', function() {
+        $(this).closest('.subCommentForm').hide();
+    });
+
+    // 답글 등록
+    $(document).on('submit', '.subCommentForm', function(e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+        
+        $.ajax({
+            url: '<?= site_url("V2_comment/add") ?>',
+            method: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    loadAllComments();
+                } else {
+                    alert(res.message || '답글 등록 실패');
+                }
+            },
+            error: function() {
+                alert('서버 오류 발생');
+            }
+        });
+    });
+
+    // 댓글 삭제
+    $(document).on('click', '.delete-btn', function() {
+        if (!confirm('댓글을 삭제하시겠습니까?')) return;
+        
+        const commentIdx = $(this).data('idx');
+
+        $.ajax({
+            url: '<?= site_url("V2_comment/delete") ?>',
+            method: 'POST',
+            data: { idx: commentIdx },
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    loadAllComments();
+                } else {
+                    alert(res.message || '댓글 삭제 실패');
+                }
+            },
+            error: function() {
+                alert('서버 오류 발생');
+            }
+        });
+    });
+});
 </script>
 
 <style>
@@ -378,12 +305,9 @@
     min-height: 400px;
 }
 
-
 .btn-danger:hover {
     background-color: #c82333;
 }
-
-
 
 /* 댓글 전체 영역 */
 .comment-section {
@@ -419,23 +343,40 @@
     cursor: pointer;
 }
 
-/* 댓글 아이템 */
-.comment-item {
-    border-left: 2px solid #ccc;
-    padding-left: 15px;
-    
+#commentForm button:hover {
+    background-color: #555;
 }
 
+/* 댓글 아이템 */
+.comment-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.comment-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* 답글 뱃지 */
+.reply-badge {
+    color: #007bff;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+/* 댓글 헤더 */
 .comment-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 14px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
 .comment-header strong {
     font-weight: bold;
+    color: #333;
 }
 
 .comment-header .meta {
@@ -444,7 +385,6 @@
     gap: 10px;
     color: #888;
     font-size: 0.9em;
-
 }
 
 .delete-btn {
@@ -452,61 +392,110 @@
     font-weight: bold;
     cursor: pointer;
     padding: 2px 5px;
+    transition: color 0.2s;
 }
 
 .delete-btn:hover {
-    color: red;
+    color: #ff4444;
 }
 
 /* 댓글 내용 */
 .comment-content {
     font-size: 14px;
-    line-height: 1.4;
-    margin: 5px 0 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    line-height: 1.6;
+    margin: 8px 0 10px 0;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
 }
 
-/* 대댓글 등록폼 */
+.comment-content p {
+    margin: 0;
+    word-wrap: break-word;
+}
+
+/* 답글 달기 버튼 */
+.reply-btn {
+    padding: 5px 12px;
+    font-size: 13px;
+    background-color: #fff;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reply-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 답글 작성 폼 */
 .subCommentForm {
     margin-top: 10px;
+    padding: 10px;
+    background-color: #f0f7ff;
+    border-radius: 5px;
 }
 
 .subCommentForm textarea {
     width: 100%;
-    max-height: 100px;
+    height: 60px;
     resize: none;
     padding: 8px;
     font-size: 13px;
     border-radius: 5px;
     border: 1px solid #ccc;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
 .subCommentForm button {
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-size: 13px;
-    background-color: #555;
-    color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    margin-right: 5px;
 }
 
-/* 버튼 */
-.reply-btn, .load-more-replies, #load_more_top_comments {
-    padding: 5px 10px;
-    font-size: 13px;
-    background-color: #eee;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    cursor: pointer;
-    margin-top: 5px;
+.subCommentForm button[type="submit"] {
+    background-color: #007bff;
+    color: white;
 }
 
-.reply-btn:hover, .load-more-replies:hover, #load_more_top_comments:hover {
-    background-color: #ddd;
+.subCommentForm button[type="submit"]:hover {
+    background-color: #0056b3;
 }
 
+.cancel-reply-btn {
+    background-color: #6c757d;
+    color: white;
+}
 
+.cancel-reply-btn:hover {
+    background-color: #5a6268;
+}
+
+/* depth별 왼쪽 테두리 색상 */
+.comment-item[style*="margin-left: 0px"] {
+    border-left: 3px solid #007bff;
+    padding-left: 10px;
+}
+
+.comment-item[style*="margin-left: 15px"] {
+    border-left: 3px solid #28a745;
+    padding-left: 10px;
+}
+
+.comment-item[style*="margin-left: 30px"] {
+    border-left: 3px solid #ffc107;
+    padding-left: 10px;
+}
+
+.comment-item[style*="margin-left: 45px"] {
+    border-left: 3px solid #dc3545;
+    padding-left: 10px;
+}
 </style>
