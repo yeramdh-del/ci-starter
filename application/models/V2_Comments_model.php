@@ -99,15 +99,13 @@ class V2_comments_model extends CI_Model
             LEFT JOIN
                 {$this->v2_comment_tree_table} AS c_t ON c.idx = c_t.comment_idx
             WHERE
-                c.board_idx = ?
-                AND
                 c_t.root_idx IN({$placeholders})
             ORDER BY c_t.path
         ";
 
        
 
-        return $this->db->query($comments_query, array_merge([$board_idx],$root_ids))->result_array();
+        return $this->db->query($comments_query, array_merge($root_ids))->result_array();
         
     }
 

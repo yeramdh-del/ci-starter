@@ -71,6 +71,26 @@ $(function () {
     let currentPage = 0;
     const limit = 10; // 서버에서 설정한 MAX_LIST_NUMBER와 동일해야 함
 
+    
+
+    let isLoading = false;
+
+    function runAsyncTask(asyncFunc) {
+
+        if (isLoading) return;
+        isLoading = true;
+
+        const jqXHR = asyncFunc();
+
+        jqXHR.fail(err => {
+            console.error(err);
+            alert('서버 오류 발생');
+        }).always(() => {
+            isLoading = false;
+        });
+    }
+
+    
     // XSS 방지 함수
     function escapeHtml(text) {
         if (!text) return '';
@@ -129,8 +149,10 @@ $(function () {
         return html;
     }
 
+
     // 전체 댓글 불러오기
     function loadAllComments(pages = 0 ) {
+        
         $.ajax({
             url: '<?= site_url("V2_comment/get_list") ?>',
             method: 'GET',
@@ -164,6 +186,9 @@ $(function () {
             }
         });
     }
+
+    // 초기 댓글 로드
+    loadAllComments();
 
 
 
@@ -204,31 +229,33 @@ $(function () {
     });
 
 
-    // 초기 댓글 로드
-    loadAllComments();
+ 
 
     // 최상위 댓글 등록
     $('#commentForm').on('submit', function(e) {
         e.preventDefault();
         const formData = $(this).serialize();
 
-        $.ajax({
-            url: '<?= site_url("V2_comment/add") ?>',
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(res) {
-                if (res.success) {
-                    loadAllComments();
-                    $('#commentForm')[0].reset();
-                } else {
-                    alert(res.message || '댓글 등록 실패');
+        runAsyncTask(()=>{
+            return $.ajax({
+                url: '<?= site_url("V2_comment/add") ?>',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) {
+                        loadAllComments();
+                        $('#commentForm')[0].reset();
+                    } else {
+                        alert(res.message || '댓글 등록 실패');
+                    }
+                },
+                error: function() {
+                    alert('서버 오류 발생');
                 }
-            },
-            error: function() {
-                alert('서버 오류 발생');
-            }
+            });
         });
+
     });
 
     // 답글 달기 버튼 클릭
@@ -250,23 +277,24 @@ $(function () {
     $(document).on('submit', '.subCommentForm', function(e) {
         e.preventDefault();
         const formData = $(this).serialize();
-        
-        $.ajax({
-            url: '<?= site_url("V2_comment/add") ?>',
-            method: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(res) {
-                if (res.success) {
-                    loadAllComments();
-                } else {
-                    alert(res.message || '답글 등록 실패');
+        runAsyncTask(()=>{
+                return $.ajax({
+                url: '<?= site_url("V2_comment/add") ?>',
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) {
+                        loadAllComments();
+                    } else {
+                        alert(res.message || '답글 등록 실패');
+                    }
+                },
+                error: function() {
+                    alert('서버 오류 발생');
                 }
-            },
-            error: function() {
-                alert('서버 오류 발생');
-            }
-        });
+            });
+        });   
     });
 
     // 댓글 삭제
@@ -275,7 +303,8 @@ $(function () {
         
         const commentIdx = $(this).data('idx');
 
-        $.ajax({
+        runAsyncTask(()=>{
+            return $.ajax({
             url: '<?= site_url("V2_comment/delete") ?>',
             method: 'POST',
             data: { idx: commentIdx },
@@ -291,6 +320,8 @@ $(function () {
                 alert('서버 오류 발생');
             }
         });
+        })
+        
     });
 });
 </script>
