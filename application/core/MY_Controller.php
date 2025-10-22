@@ -14,6 +14,7 @@ class MY_Controller extends CI_Controller
         # Parameter
         $this->params = $this->getParams();
         $this->cookies = $this->getCookies();
+        $this->config->load('page_constants');
     }
 
     private function getParams()
@@ -109,4 +110,38 @@ class MY_Controller extends CI_Controller
 
         $this->load->vars($aVars);
     }
+
+
+    // NOTE: render
+    public function render($title_key, $view_key, $data = []) {
+        $view_names = $this->config->item('view_names');
+        $page_titles = $this->config->item('page_titles');
+
+        if (!isset($view_names[$view_key]) || !isset($page_titles[$title_key])) {
+            show_error("잘못된 view_key 또는 title_key 입니다.");
+            return;
+        }
+
+        $response = [
+            'page_title' => $page_titles[$title_key],
+            'view_name' => $view_names[$view_key],
+            
+        ];
+
+        if (is_array($data)) {  
+        // $response 배열에 $data 배열의 키/값 병합
+        $response = array_merge($response, $data);
+        }
+
+
+        $this->load->view('layout', $response);
+    }
+
+    //NOTE: init Response data
+    public function json_response(){
+        echo json_encode([
+            'success' => true,
+        ]);
+    }
+
 }

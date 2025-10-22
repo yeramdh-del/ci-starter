@@ -8,6 +8,8 @@ class Board extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        //모델 불러오기 
+        $this->load->model("Board_model");
     }
 
     //로그인 상태 확인
@@ -24,11 +26,6 @@ class Board extends MY_Controller
          return $this->Category_model->get_all();
     }
 
-    //TODO: 본인 개시글인지 확인 매서드
-    private function is_admin(){
-
-    }
-
     //NOTE: 게시판 - 게시판 리스트 경로
     public function index()
     {
@@ -40,9 +37,7 @@ class Board extends MY_Controller
         $category_idx= $this->input->get('category_idx') ?: 0;
 
 
-        //FIXME: 게시글 등록/수정/삭제 후 SORTING 및 페이지네이션 코드 수정
-        //모델 불러오기
-        $this->load->model("Board_model");
+
 
         //게시글 리스트 반환 쿼리
         $result = $this->Board_model->get_all($search, $limit, $pages ,$category_idx);
@@ -50,13 +45,12 @@ class Board extends MY_Controller
 
         //게시글 전채 갯수 반환 (페이지네이션용)
         $count = $this->Board_model->get_all_count($search,$category_idx);
-        
+
+
+        //init response data
         //카테고리 리스트 송신
         $data['categorys'] = $this->get_category_list();
         $data['category_idx'] = $category_idx;
-
-        $data["page_title"]='게시판';
-        $data['content']= "board/list";
         $data['board_list'] = $result;
         //객체로 전달
         $data['board_info'] = (object)[
@@ -66,14 +60,12 @@ class Board extends MY_Controller
             'total' => $count->total,
         ];
 
+        $this->render('BOARD_LIST','BOARD_LIST', $data);
 
-        $this->load->view( 'layout', $data );
     }
 
     //NOTE: 게시판 - 등록 페이지
     public function register(){
-
-       
         
         //로그인 후 접근 가능하도록 차단
         if(!$this->is_login()){
@@ -85,12 +77,10 @@ class Board extends MY_Controller
             ";
         }
 
-
-        $data['page_title']= '게시글 등록';
-        $data['content']= 'board/register';
+        //init response data
         $data['categorys'] = $this->get_category_list();
 
-        $this->load->view( 'layout', $data );
+        $this->render('BOARD_REGISTER','BOARD_REGISTER', $data);
     }
 
     //NOTE: 게시판 - 등록 메서드
@@ -102,9 +92,6 @@ class Board extends MY_Controller
 
         //세션 고객 idx정보
         $user = $this->session->userdata('user');
-
-        //모델 불러오기
-        $this->load->model("Board_model");
 
         //게시글 리스트 생성 쿼리
         $this->Board_model->create($title, $content, $user->idx , $category_idx);
@@ -123,10 +110,10 @@ class Board extends MY_Controller
         $result = $this->Board_model->get_one($idx);
         
         $data['categorys'] = $this->get_category_list();
-        $data["page_title"]='게시판 수정페이지';
-        $data['content']= "board/edit";
         $data["board_info"] = $result;
-        $this->load->view("layout", $data);
+
+        
+        $this->render("BOARD_EDIT","BOARD_EDIT", $data);
 
     }
 
@@ -141,9 +128,6 @@ class Board extends MY_Controller
         //권한 확인
         $user = $this->session->userdata("user");
 
-
-        //모델 불러오기
-        $this->load->model("Board_model");
 
         //게시글 반환 쿼리
         $board_one = $this->Board_model->get_one($idx);
@@ -177,10 +161,6 @@ class Board extends MY_Controller
     //NOTE: 게시판 - 상세 페이지
     public function detail($idx){
 
-
-        //모델 불러오기
-        $this->load->model("Board_model");
-
         //게시글 반환 쿼리
         $result = $this->Board_model->get_one($idx);
 
@@ -193,10 +173,9 @@ class Board extends MY_Controller
                     </script>";
         }
 
-        $data["page_title"]='게시판 상세페이지';
-        $data['content']= "board/detail";
+        //init response data
         $data["board_info"] = $result;
-        $this->load->view("layout", $data);
+        $this->render("BOARD_DETAIL","BOARD_DETAIL", $data);
     }
 
     //NOTE: 삭제 매서드

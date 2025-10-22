@@ -35,7 +35,7 @@
 
     <!-- 메인 - 각 페이지의 내용이 여기에 들어옴 -->
     <main>
-        <?php $this->load->view($content); ?>
+        <?php $this->load->view($view_name); ?>
     </main>
 </body>
 </html>

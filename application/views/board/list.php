@@ -19,35 +19,6 @@
         $start_page = max(0, $end_page - $page_block_size);
     }
 
-//     //FIXME: 임시 테스트
-//     $posts = array([
-//         "id" => "1",
-//         "title"=> "test",
-//         "content"=> "test content",
-//         "author" => "작성자",
-//         "created_date"=> "2024-06-01",
-//     ],[
-//         "id" => "2",
-//         "title"=> "test2",
-//         "content"=> "test2 content",
-//         "author" => "작성자1",
-//         "created_date"=> "2024-06-02",
-//     ],
-//     [
-//         "id" => "3",
-//         "title"=> "test3",
-//         "content"=> "test2 content",
-//         "author" => "작성자1",
-//         "created_date"=> "2024-06-02",
-//     ],
-// [
-//         "id" => "3",
-//         "title"=> "test3",
-//         "content"=> "test2 content",
-//         "author" => "작성자1",
-//         "created_date"=> "2024-06-02",
-//     ]);
-
 ?>
 
 

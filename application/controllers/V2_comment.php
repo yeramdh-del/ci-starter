@@ -7,6 +7,17 @@ class V2_comment extends CI_Controller
 
     const MAX_LIST_NUMBER = 5; //NOTE: 최대 댓글 입력 갯수
 
+        
+    //생성자
+    public function __construct()
+    {
+        parent::__construct();
+        //init model
+        $this->load->model('V2_comments_model');
+        
+    }
+
+
 
     private function is_login(){
 
@@ -17,13 +28,15 @@ class V2_comment extends CI_Controller
         
         return false;
     }
-    public function index($board_idx)
-    {
-        $data = [
-            'board_info' => (object)['idx' => $board_idx],
-        ];
-        $this->load->view('view', $data);
-    }
+
+
+    // public function index($board_idx): void
+    // {
+    //     $data = [
+    //         'board_info' => (object)['idx' => $board_idx],
+    //     ];
+    //     $this->load->view('view', $data);
+    // }
 
 
 
@@ -31,8 +44,7 @@ class V2_comment extends CI_Controller
     public function get_list(){
 
 
-        //init model
-        $this->load->model('V2_comments_model');
+       
         
 
         //request data
@@ -69,9 +81,6 @@ class V2_comment extends CI_Controller
         return;
         }
 
-        //init model
-        $this->load->model('V2_comments_model');
-
         //request data
         $board_idx = (int) $this->input->post('board_idx');
         $parent_idx = (int) $this->input->post('parent_idx') ? : null;
@@ -103,10 +112,6 @@ class V2_comment extends CI_Controller
     //NOTE:댓글 - 삭제
     public function delete(){
 
-        
-        //init model
-        $this->load->model('V2_comments_model');
-
         //request data
         $idx = (int) $this->input->post('idx');
 
@@ -126,8 +131,6 @@ class V2_comment extends CI_Controller
 
         $this->V2_comments_model->delete($idx);
 
-
-        
              echo json_encode([
             'success' => true,
         ]);

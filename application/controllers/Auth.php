@@ -6,32 +6,27 @@
 
         public function __construct(){  
             parent::__construct();
-            
+            $this->load->model("Auth_model");
         }
 
 
         public function index(){
-            echo "hello";
+            redirect("auth/login");
         }
 
 
         //NOTE: 로그인 - 로그인 페이지
         public function login(){ 
-
-            $data["page_title"]="로그인";
-            $data["content"]= "auth/login";
-            $this->load->view("layout", $data);
+            $this->render("AUTH_LOGIN","AUTH_LOGIN");
         }
 
         //NOTE: 로그인 - 회원정보 확인 매서드
         public function login_check(){
 
+            //request data
             $email = $this->input->post("email");
             $password = $this->input->post("password");
-
-
-            $this->load->model("Auth_model");
-
+   
             $user_info = $this->Auth_model->get_one_by_email($email);
 
             if(!$user_info){
@@ -54,10 +49,7 @@
 
         //NOTE: 회원가입 - 페이지 이동
         public function register(){
-            $data["page_title"]='회원가입';
-            $data['content']= 'auth/register';
-            $this->load->view('layout', $data);
-
+            $this->render('AUTH_REGISTER','AUTH_REGISTER');
         }
 
 
@@ -75,9 +67,6 @@
             echo "<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>";
             return;
         }
-
-        $this->load->model( "Auth_model");
-
         
         $user_info = $this->Auth_model->get_one_by_email($email);
 
