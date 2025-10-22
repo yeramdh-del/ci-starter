@@ -2,8 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 //NOTE: 비동기 매서드 response값 form 통일 필요
-class V2_comment extends CI_Controller
-{
+class V2_comment extends MY_Controller {
 
     const MAX_LIST_NUMBER = 5; //NOTE: 최대 댓글 입력 갯수
 
@@ -42,11 +41,6 @@ class V2_comment extends CI_Controller
 
     //NOTE: 댓글 - 리스트 불러오기
     public function get_list(){
-
-
-       
-        
-
         //request data
         $board_idx = $this->input->get('board_idx');
         $pages = $this->input->get('pages');
@@ -55,16 +49,17 @@ class V2_comment extends CI_Controller
         
         $result = $this->V2_comments_model->get_all($board_idx, self::MAX_LIST_NUMBER ,$offset);
         $count = $this->V2_comments_model->get_all_count($board_idx);
+
+
+        $data = [
+            'total' => $count->total,
+            'pages' => $pages,
+            'limit' => self::MAX_LIST_NUMBER,
+            'list' => $result
+        ];
+
+        return $this->json_response(true ,$data, "ok");
         
-        echo json_encode([
-            'success' => true,
-            "comment_info" => (object)[
-                "total" => $count->total,
-                "pages" =>$pages,
-                'limit' => self::MAX_LIST_NUMBER,
-            ],
-            "comments" => $result
-        ]);
 
     }
 
@@ -101,12 +96,7 @@ class V2_comment extends CI_Controller
         
         $created_comment = $this->V2_comments_model->insert($comment_data);
 
-        
-
-        echo json_encode([
-            'success' => true,
-            "comment" => $created_comment
-        ]);
+        return $this->json_response(true ,$created_comment,'ok');
     }
 
     //NOTE:댓글 - 삭제
@@ -131,9 +121,7 @@ class V2_comment extends CI_Controller
 
         $this->V2_comments_model->delete($idx);
 
-             echo json_encode([
-            'success' => true,
-        ]);
+        return $this->json_response(true ,null,"ok");
 
     }
 

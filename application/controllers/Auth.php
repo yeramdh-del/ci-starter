@@ -30,11 +30,12 @@
             $user_info = $this->Auth_model->get_one_by_email($email);
 
             if(!$user_info){
-                echo "<script>alert('존재하지 않는 이메일입니다.'); history.back();</script>";
+
+                return $this->redirect_with_alert("존재하지 않는 이메일입니다.");
             }
 
             if($user_info->password != $password){
-                echo "<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>";
+                return $this->redirect_with_alert('비밀번호가 일치하지 않습니다.');
             }
             else{
                 //비밀번호 값제거
@@ -64,8 +65,7 @@
 
         //비밀번호 중복 체크
         if($password !== $password_confirm) {
-            echo "<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>";
-            return;
+            return $this->redirect_with_alert('비밀번호가 일치하지 않습니다.');
         }
         
         $user_info = $this->Auth_model->get_one_by_email($email);
@@ -73,7 +73,7 @@
 
 
         if($user_info){
-            echo "<script>alert('중복된 이메일입니다. 다른 이메일을 사용하세요'); history.back();</script>";
+            return $this->redirect_with_alert('중복된 이메일입니다. 다른 이메일을 사용하세요.');
         }
         
         //닉네임 중복 체크
@@ -81,7 +81,7 @@
         $select_name_result = $this->Auth_model->get_one_by_name($name);
 
         if($select_name_result){
-            echo "<script>alert('중복된 이름입니다. 다른 이름을 사용하세요'); history.back();</script>";
+            return $this->redirect_with_alert('중복된 이름입니다. 다른 이름을 사용하세요.');
         }
 
         //DB에 회원정보 저장
@@ -89,7 +89,7 @@
         
 
         // 비밀번호 일치 시 로그인 페이지로 이동
-        echo "<script>alert('회원가입이 완료되었습니다.'); location.href='" . site_url('auth/login') . "';</script>";
+        $this->redirect_with_alert('회원가입이 완료되었습니다.', "AUTH_LOGIN");
     }
   
 

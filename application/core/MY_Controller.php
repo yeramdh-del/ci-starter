@@ -117,6 +117,8 @@ class MY_Controller extends CI_Controller
         $view_names = $this->config->item('view_names');
         $page_titles = $this->config->item('page_titles');
 
+
+        //view,title keyword path -> \application\config\page_constants.php
         if (!isset($view_names[$view_key]) || !isset($page_titles[$title_key])) {
             show_error("잘못된 view_key 또는 title_key 입니다.");
             return;
@@ -138,10 +140,37 @@ class MY_Controller extends CI_Controller
     }
 
     //NOTE: init Response data
-    public function json_response(){
-        echo json_encode([
-            'success' => true,
+    public function json_response($success, $data , $message){
+        
+         echo json_encode([
+            'success' => $success,
+            'data' => $data,
+            'message' => $message
         ]);
+
     }
 
+    
+    protected function redirect_with_alert($message = null ,$redirect_url=null) {
+        
+        if(!is_null( $message)) {
+        $this->session->set_flashdata('alert_message', $message);
+        }
+        if(is_null($redirect_url)) {
+            $redirect_url = $this->agent->referrer() ?? site_url();
+            return redirect($redirect_url);
+        }else{
+
+             //view keyword path -> \application\config\page_constants.php
+            $view_names = $this->config->item('view_names');
+            if(!isset($view_names[$redirect_url])){
+                show_error("잘못된 redirect_url 입니다.");
+                return;
+            }
+
+            return redirect($view_names[$redirect_url]);
+
+        }
+        
+    }
 }

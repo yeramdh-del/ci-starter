@@ -69,12 +69,7 @@ class Board extends MY_Controller
         
         //로그인 후 접근 가능하도록 차단
         if(!$this->is_login()){
-            echo "
-                <script>
-                    alert('로그인 후 이용해주십시오.');
-                    history.back();
-                </script>
-            ";
+            return $this->redirect_with_alert('로그인 후 이용해주십시오');
         }
 
         //init response data
@@ -108,7 +103,15 @@ class Board extends MY_Controller
 
         //게시글 반환 쿼리
         $result = $this->Board_model->get_one($idx);
-        
+        //권한 확인
+        $user = $this->session->userdata("user");        
+
+        if(!$result){
+            return $this->redirect_with_alert('존재하지 않는 게시글입니다.',"BOARD_LIST"); 
+        }elseif($result->user_idx != $user->idx){ 
+            return $this->redirect_with_alert('권한이 없는 사용자입니다.','BOARD_LIST');
+        }
+
         $data['categorys'] = $this->get_category_list();
         $data["board_info"] = $result;
 
@@ -137,20 +140,10 @@ class Board extends MY_Controller
 
         // //존재하지 않는 게시글일때 알람 출력
         if(!$board_one){
-           echo "
-                <script>
-                    alert('존재하지 않는 게시글입니다.');
-                    location.href = '" . base_url('board') . "';
-                </script>";
-           
+            return $this->redirect_with_alert('존재하지 않는 게시글입니다.',"BOARD_LIST");    
         }elseif($board_one && $board_one->user_idx != $user->idx){
-               echo "
-                <script>
-                    alert('권한이 없는 사용자입니다.');
-                    location.href = '" . base_url('board') . "';
-                </script>";
+            return $this->redirect_with_alert('권한이 없는 사용자입니다.','BOARD_LIST');
         }else{
-
             //게시글 수정 쿼리
             $this->Board_model->update($title, $content, $idx, $category_idx);
             redirect("board");
@@ -166,11 +159,7 @@ class Board extends MY_Controller
 
 
         if(!$result){
-            echo    " 
-                    <script>
-                        alert('존재하지 않는 게시글입니다.');
-                        location.href = '" . base_url('board') . "';
-                    </script>";
+            return $this->redirect_with_alert("존재하지 않는 게시글입니다.", 'BOARD_LIST');
         }
 
         //init response data
@@ -192,18 +181,10 @@ class Board extends MY_Controller
 
             //존재하지 않는 게시글일때 알람 출력
             if(!$board_one){
-            echo "
-                    <script>
-                        alert('존재하지 않는 게시글입니다.');
-                        location.href = '" . base_url('board') . "';
-                    </script>";
+                return $this->redirect_with_alert("존재하지 않는 게시글입니다.","BOARD_LIST");
             //권한 확인
             }elseif($board_one && $board_one->user_idx != $user->idx){
-                echo "
-                    <script>
-                        alert('권한이 없는 사용자입니다.');
-                        location.href = '" . base_url('board') . "';
-                    </script>";
+                return $this->redirect_with_alert("권한이 없는 사용자입니다.","BOARD_LIST");
             }else{
                 
                 $this->Board_model->delete($idx);

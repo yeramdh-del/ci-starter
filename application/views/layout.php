@@ -1,3 +1,11 @@
+<!-- NOTE: 로그인,접근 권한등 오류 메세지 출력 -->
+<?php if ($this->session->flashdata('alert_message')): ?>
+    <script>
+        alert("<?= $this->session->flashdata('alert_message') ?>");
+    </script>
+<?php endif; ?>
+
+
 <?php
     $user = $this->session->userdata('user');
     

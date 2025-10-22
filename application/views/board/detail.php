@@ -139,16 +139,19 @@ $(function () {
             success: function(res) {
                 if (res.success) {
                     let html = '';
-                    res.comments.forEach(comment => {
+                    const comments = res.data.list;
+                    const pages = res.data.pages;
+                    const limit = res.data.limit;
+                    const total = res.data.total;                    
+                    const totalPages = Math.ceil(total / limit);
+
+
+                    comments.forEach(comment => {
                         html += createCommentHTML(comment);
                     });
                     $('#comment_list').html(html);
 
                     // 페이지네이션 생성
-                    const total = res.comment_info.total;
-                    const limit = res.comment_info.limit;
-                    const totalPages = Math.ceil(total / limit);
-
                     generatePagination(totalPages, pages);
                     currentPage = pages;
                 } else {
