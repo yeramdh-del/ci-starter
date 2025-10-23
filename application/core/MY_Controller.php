@@ -142,15 +142,20 @@ class MY_Controller extends CI_Controller
     //NOTE: init Response data
     public function json_response($success, $data , $message){
         
-         echo json_encode([
-            'success' => $success,
-            'data' => $data,
-            'message' => $message
-        ]);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'success' => $success,
+                'data' => $data,
+                'message' => $message
+            ]));
+
+
 
     }
 
     
+    //NOTE: alter 호출뒤 랜더링되는 매서드 추가
     protected function redirect_with_alert($message = null ,$redirect_url=null) {
         
         if(!is_null( $message)) {
