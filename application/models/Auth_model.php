@@ -1,6 +1,8 @@
 <?php
 class Auth_model extends MY_Model{
    
+
+    protected $table = "user";
     //생성자
     public function __construct()
     {
@@ -8,39 +10,24 @@ class Auth_model extends MY_Model{
     }
 
     
+
     //유저 정보 검색
-    public function get_one_by_email($email){
-        $query_text = "
-           SELECT
-                idx,
-                name,
-                email,
-                password
-            FROM
-                user
-            WHERE
-                email= ?
-            ";
-            
-        $query = $this->db->query($query_text, array($email));
-        return $query->row();
+    public function get_one_by($column, $value) {
+    // 허용된 컬럼만 검색 가능하도록 지정
+    $allowed_columns = ['email', 'name', 'idx'];
+
+
+    if (!in_array($column, $allowed_columns)) {
+        return null;
     }
-    public function get_one_by_name($name){
-        $query_text = "
-           SELECT
-                idx,
-                name,
-                email,
-                password
-            FROM
-                user
-            WHERE
-                name= ?
-            ";
-            
-        $query = $this->db->query($query_text, array($name));
-        return $query->row();
-    }
+
+    $query = $this->db
+        ->select('idx, name, email, password')
+        ->get_where($this->table, [$column => $value], 1);
+
+    return $query->row();
+}
+
 
     //회원가입 등록 매서드
     public function create($name,$email,$password){

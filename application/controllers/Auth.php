@@ -27,7 +27,7 @@
             $email = $this->input->post("email");
             $password = $this->input->post("password");
    
-            $user_info = $this->Auth_model->get_one_by_email($email);
+            $user_info = $this->Auth_model->get_one_by('email',$email);
 
             if(!$user_info){
 
@@ -68,7 +68,7 @@
             return $this->redirect_with_alert('비밀번호가 일치하지 않습니다.');
         }
         
-        $user_info = $this->Auth_model->get_one_by_email($email);
+        $user_info = $this->Auth_model->get_one_by('email',$email);
 
 
 
@@ -78,7 +78,7 @@
         
         //닉네임 중복 체크
 
-        $select_name_result = $this->Auth_model->get_one_by_name($name);
+        $select_name_result =  $this->Auth_model->get_one_by('name',$name);;
 
         if($select_name_result){
             return $this->redirect_with_alert('중복된 이름입니다. 다른 이름을 사용하세요.');

@@ -11,6 +11,7 @@ class MY_Model extends CI_Model
 
     private $db_conn = null;
 
+
     public function __construct()
     {
         $this->ci =& get_instance();

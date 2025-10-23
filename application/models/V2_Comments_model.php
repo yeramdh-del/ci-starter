@@ -17,32 +17,56 @@ class V2_comments_model extends CI_Model
         ];
     }
 
+    protected function baseBuilder() {
+        $this->db->reset_query();
+        $this->db->from("$this->v2_comments_table AS c");
+        $this->db->join("$this->v2_comment_tree_table AS c_t", 'c.idx = c_t.comment_idx', 'left');
+        return $this->db;
+    }
+
     //댓글 정보 가져오기
     public function get_by_id($idx){
-        $query = $this->db->query(
-            "
-                SELECT
-                    c.*,
-                    u.name AS author,
-                    c.parent_idx,
-                    c_t.depth,
-                    c_t.path,
-                    c_t.root_idx
 
-                FROM
-                        $this->v2_comments_table AS c
-                    LEFT JOIN
-                        user AS u
-                    ON
-                        c.user_idx = u.idx
-                    LEFT JOIN
-                        $this->v2_comment_tree_table AS c_t
-                    ON c.idx = c_t.comment_idx
-                WHERE
-                    c.idx = ?
-            ",
-        array($idx));
+        //V1
+        // $query = $this->db->query(
+        //     "
+        //         SELECT
+        //             c.*,
+        //             u.name AS author,
+        //             c.parent_idx,
+        //             c_t.depth,
+        //             c_t.path,
+        //             c_t.root_idx
 
+        //         FROM
+        //                 $this->v2_comments_table AS c
+        //             LEFT JOIN
+        //                 user AS u
+        //             ON
+        //                 c.user_idx = u.idx
+        //             LEFT JOIN
+        //                 $this->v2_comment_tree_table AS c_t
+        //             ON c.idx = c_t.comment_idx
+        //         WHERE
+        //             c.idx = ?
+        //     ",
+        // array($idx));
+
+
+        $builder = $this->baseBuilder();
+        $builder->join("user AS u","c.user_idx = u.idx","left");
+
+        $builder->select("
+                c.*,
+                u.name AS author,
+                c.parent_idx,
+                c_t.depth,
+                c_t.path,
+                c_t.root_idx
+                ");
+        $builder->where("c.idx", $idx);
+
+        $query = $builder->get();
         return $query->row();
     }
 
@@ -52,26 +76,38 @@ class V2_comments_model extends CI_Model
 
     
         //최상위 댓글 페이지네이션
-        $root_result = $this->db->query(
-            "
-                SELECT c.idx
-                FROM
-                        v2_comments AS c
-                    LEFT JOIN
-                        v2_comment_tree AS c_t
-                    ON  c.idx = c_t.comment_idx
-                WHERE
-                    c.board_idx = ?
-                    AND
-                    c_t.depth = 0
-                ORDER BY c.created_at
-                LIMIT ?
-                OFFSET ?
+        // $root_result = $this->db->query(
+        //     "
+        //         SELECT c.idx
+        //         FROM
+        //                 v2_comments AS c
+        //             LEFT JOIN
+        //                 v2_comment_tree AS c_t
+        //             ON  c.idx = c_t.comment_idx
+        //         WHERE
+        //             c.board_idx = ?
+        //             AND
+        //             c_t.depth = 0
+        //         ORDER BY c.created_at
+        //         LIMIT ?
+        //         OFFSET ?
                 
-            ",
-            array($board_idx, $limit, $offset))->result_array();
+        //     ",
+        //     array($board_idx, $limit, $offset))->result_array();
+
+
+        $root_builder = $this->baseBuilder();
+        $root_builder->select("c.idx");
+        $root_builder->where('c_t.depth',0);
+        $root_builder->where('c.board_idx', $board_idx);
+        $root_builder->order_by('c.created_at','ASC');
+        $root_builder->limit($limit);
+        $root_builder->offset($offset);
+        $root_query = $root_builder->get();
         
-    
+        $root_result = $root_query->result_array();
+
+            
         if (empty($root_result)) {
             return array();
         }
@@ -80,53 +116,75 @@ class V2_comments_model extends CI_Model
         $root_ids = array_column($root_result, 'idx');
 
         
+  
+        //v1
         //해당 최상위 댓글 + 모든 자식 댓글 조회
-        $placeholders = implode(',', array_fill(0, count($root_ids), '?'));
-    
-        $comments_query = "
-            SELECT
-                c.idx,
-                c.content,
-                c.created_at,
-                u.name AS author,
-                c.parent_idx,
-                c_t.depth,
-                c_t.path
-            FROM
-                {$this->v2_comments_table} AS c
-            LEFT JOIN
-                user AS u ON c.user_idx = u.idx
-            LEFT JOIN
-                {$this->v2_comment_tree_table} AS c_t ON c.idx = c_t.comment_idx
-            WHERE
-                c_t.root_idx IN({$placeholders})
-            ORDER BY c_t.path
-        ";
+        // $placeholders = implode(',', array_fill(0, count($root_ids), '?'));
+        // $comments_query = "
+        //     SELECT
+        //         c.idx,
+        //         c.content,
+        //         c.created_at,
+        //         u.name AS author,
+        //         c.parent_idx,
+        //         c_t.depth,
+        //         c_t.path
+        //     FROM
+        //         {$this->v2_comments_table} AS c
+        //     LEFT JOIN
+        //         user AS u ON c.user_idx = u.idx
+        //     LEFT JOIN
+        //         {$this->v2_comment_tree_table} AS c_t ON c.idx = c_t.comment_idx
+        //     WHERE
+        //         c_t.root_idx IN({$placeholders})
+        //     ORDER BY c_t.path
+        // ";
+        // return $this->db->query($comments_query, array_merge($root_ids))->result_array();
 
-       
+        $comments_builder = $this->baseBuilder();
+        $comments_builder->join("user AS u","c.user_idx = u.idx","left");
+        $comments_builder->select("
+            c.idx,
+            c.content,
+            c.created_at,
+            u.name AS author,
+            c.parent_idx,
+            c_t.depth,
+            c_t.path
+        ");
+        $comments_builder->where_in("c_t.root_idx",$root_ids);
+        $comments_query = $comments_builder->get();
 
-        return $this->db->query($comments_query, array_merge($root_ids))->result_array();
-        
+        return $comments_query->result_array();
+                
     }
 
     public function get_all_count($board_idx){
-        $query = $this->db->query(
-            "
-                SELECT 
-                    COUNT(DISTINCT c_t.comment_idx) as total
-                FROM
-                    {$this->v2_comments_table} AS c
-                LEFT JOIN 
-                        {$this->v2_comment_tree_table} AS c_t 
-                    ON 
-                        c.idx = c_t.comment_idx
-                WHERE 
-                    c.board_idx = ?
-                AND 
-                    c_t.depth = 0
 
-            ",
-        array($board_idx));
+        //v1
+        // $query = $this->db->query(
+        //     "
+        //         SELECT 
+        //             COUNT(DISTINCT c_t.comment_idx) as total
+        //         FROM
+        //             {$this->v2_comments_table} AS c
+        //         LEFT JOIN 
+        //                 {$this->v2_comment_tree_table} AS c_t 
+        //             ON 
+        //                 c.idx = c_t.comment_idx
+        //         WHERE 
+        //             c.board_idx = ?
+        //         AND 
+        //             c_t.depth = 0
+
+        //     ",
+        // array($board_idx));
+
+        $builder = $this->baseBuilder();
+        $builder->select("COUNT(DISTINCT c_t.comment_idx) as total");
+        $builder->where("c.board_idx", $board_idx);
+        $builder->where("c_t.depth",0);
+        $query = $builder->get();
 
         return $query->row();
 
