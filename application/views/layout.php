@@ -1,4 +1,4 @@
-<!-- NOTE: 로그인,접근 권한등 오류 메세지 출력 -->
+<!-- NOTE: 오류 및 알림 메세지 출력  코드 -->
 <?php if ($this->session->flashdata('alert_message')): ?>
     <script>
         alert("<?= $this->session->flashdata('alert_message') ?>");
@@ -28,7 +28,6 @@
             <a href="/board" style="text-decoration: none;"><h1 class="header-title">게시글</h1></a>
             
            <?php if ($user): ?>
-                <!-- FIXME: 로그인 유무 확인용 -->
                 <div style="display: flex; gap: 2px; align-items: center;">
                     <span><?php echo $user->name ?>님 환영합니다.</span>
                     <a href="/auth/logout"><button class="btn-primary">로그아웃</button></a>

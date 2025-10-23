@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 
-// NOTE: 페이지 렌더링시 경로 상수값 지정
+// NOTE: 페이지 매핑 설정
 $config['view_names'] = [
     'BOARD_LIST' => 'board/index',
     'BOARD_REGISTER' => 'board/register',

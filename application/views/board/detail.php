@@ -192,7 +192,7 @@ $(function () {
 
 
 
-    // 페이지네이션 버튼 생성 함수
+    // 페이지네이션 버튼 생성 함수d
     function generatePagination(totalPages, currentPage) {
         let paginationHtml = '';
 
@@ -277,15 +277,64 @@ $(function () {
     $(document).on('submit', '.subCommentForm', function(e) {
         e.preventDefault();
         const formData = $(this).serialize();
+        const $currentForm = $(this);
+        
         runAsyncTask(()=>{
-                return $.ajax({
+            return $.ajax({
                 url: '<?= site_url("V2_comment/add") ?>',
                 method: 'POST',
                 data: formData,
                 dataType: 'json',
                 success: function(res) {
-                    if (res.success) {
-                        loadAllComments();
+                    if (res.success && res.data) {
+                        // 새 댓글 HTML 생성
+                        const newCommentHTML = createCommentHTML(res.data);
+                        
+                        // 부모 댓글과 같은 parent를 가진 마지막 답글 찾기
+                        const parentIdx = res.data.parent_idx;
+                        const $parentComment = $(`.comment-item[data-idx="${parentIdx}"]`);
+                        
+                        // 부모 댓글의 모든 하위 답글 찾기 (같은 parent_idx를 가진 답글들)
+                        let $insertAfter = $parentComment;
+                        let $nextComment = $parentComment.next('.comment-item');
+                        
+                        // 부모 댓글 이후의 모든 댓글을 순회하면서
+                        // 들여쓰기가 현재 답글의 depth 이상인 동안 계속 진행
+                        while ($nextComment.length > 0) {
+                            const nextMarginLeft = parseInt($nextComment.css('margin-left')) || 0;
+                            const currentDepth = res.data.depth;
+                            const nextDepth = nextMarginLeft / 15; // depth * 15 = margin-left
+                            
+                            // 다음 댓글의 depth가 현재 depth보다 작으면 중단
+                            // (형제가 아닌 다른 부모의 답글을 만난 것)
+                            if (nextDepth < currentDepth) {
+                                break;
+                            }
+                            
+                            $insertAfter = $nextComment;
+                            $nextComment = $nextComment.next('.comment-item');
+                        }
+                        
+                        // 찾은 위치 다음에 새 댓글 삽입
+                        $insertAfter.after(newCommentHTML);
+                        
+                        // 답글 폼 숨기기 및 초기화
+                        $currentForm.hide();
+                        $currentForm[0].reset();
+                        
+                        // 새로 추가된 댓글로 스크롤 이동
+                        const $newComment = $(`.comment-item[data-idx="${res.data.idx}"]`);
+                        if ($newComment.length) {
+                            $('html, body').animate({
+                                scrollTop: $newComment.offset().top - 100
+                            }, 500);
+                            
+                            // 강조 효과 (선택사항)
+                            $newComment.css('background-color', '#fff3cd');
+                            setTimeout(() => {
+                                $newComment.css('background-color', '');
+                            }, 2000);
+                        }
                     } else {
                         alert(res.message || '답글 등록 실패');
                     }
@@ -296,7 +345,6 @@ $(function () {
             });
         });   
     });
-
     // 댓글 삭제
     $(document).on('click', '.delete-btn', function() {
         if (!confirm('댓글을 삭제하시겠습니까?')) return;

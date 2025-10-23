@@ -1,7 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-//NOTE: 비동기 매서드 response값 form 통일 필요
 class V2_comment extends MY_Controller {
 
     const MAX_LIST_NUMBER = 5; //NOTE: 최대 댓글 입력 갯수
@@ -68,12 +67,7 @@ class V2_comment extends MY_Controller {
     public function add()
     {
         if(!$this->is_login()){
-             echo json_encode([
-            'success' => false,
-            'data' => null,
-            'message' => "로그인 후 사용할 수 있습니다."
-        ]);
-        return;
+        return $this->json_response(false ,null ,"로그인 후 사용할 수 있습니다.");
         }
 
         //request data
@@ -110,12 +104,7 @@ class V2_comment extends MY_Controller {
         $comment = $this->V2_comments_model->get_by_id($idx);
         
         if($user->idx != $comment->user_idx){
-             echo json_encode([
-            'success' => false,
-            'data' => null,
-            'message' => "권한이 없는 사용자입니다."
-        ]);
-        return;
+        return $this->json_response(false ,null ,"권한이 없는 사용자입니다.");
         }
 
 

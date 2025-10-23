@@ -131,12 +131,8 @@ class Board extends MY_Controller
         //권한 확인
         $user = $this->session->userdata("user");
 
-
         //게시글 반환 쿼리
         $board_one = $this->Board_model->get_one($idx);
-
-
-
 
         // //존재하지 않는 게시글일때 알람 출력
         if(!$board_one){

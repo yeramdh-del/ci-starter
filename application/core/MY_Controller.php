@@ -141,7 +141,7 @@ class MY_Controller extends CI_Controller
 
     //NOTE: init Response data
     public function json_response($success, $data , $message){
-        
+
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
@@ -149,9 +149,6 @@ class MY_Controller extends CI_Controller
                 'data' => $data,
                 'message' => $message
             ]));
-
-
-
     }
 
     

@@ -7,15 +7,6 @@ class V2_comments_model extends CI_Model
     protected $v2_comment_tree_table = 'v2_comment_tree';
 
 
-    //커멘트 기본 레코드값 셋팅
-    private function init_comment_tee_recode($idx){
-        return [
-            'comment_idx' => $idx,
-            'root_idx' => $idx,
-            'path' => sprintf('%010d/',$idx)
-,            'depth' => 0
-        ];
-    }
 
     protected function baseBuilder() {
         $this->db->reset_query();
@@ -70,11 +61,8 @@ class V2_comments_model extends CI_Model
         return $query->row();
     }
 
-    //댓글 리스트 가져오기
-    public function get_all($board_idx, $limit, $offset){
-        
+    private function root_comment_idx_list($board_idx, $limit, $offset){
 
-    
         //최상위 댓글 페이지네이션
         // $root_result = $this->db->query(
         //     "
@@ -94,8 +82,6 @@ class V2_comments_model extends CI_Model
                 
         //     ",
         //     array($board_idx, $limit, $offset))->result_array();
-
-
         $root_builder = $this->baseBuilder();
         $root_builder->select("c.idx");
         $root_builder->where('c_t.depth',0);
@@ -113,11 +99,14 @@ class V2_comments_model extends CI_Model
         }
 
 
-        $root_ids = array_column($root_result, 'idx');
+         return array_column($root_result, 'idx');
+    }
 
+    //댓글 리스트 가져오기
+    public function get_all($board_idx, $limit, $offset){
+
+        $root_ids = $this->root_comment_idx_list($board_idx, $limit, $offset);
         
-  
-        //v1
         //해당 최상위 댓글 + 모든 자식 댓글 조회
         // $placeholders = implode(',', array_fill(0, count($root_ids), '?'));
         // $comments_query = "
@@ -153,6 +142,7 @@ class V2_comments_model extends CI_Model
             c_t.path
         ");
         $comments_builder->where_in("c_t.root_idx",$root_ids);
+        $comments_builder->order_by("c_t.path","ASC");
         $comments_query = $comments_builder->get();
 
         return $comments_query->result_array();
@@ -191,7 +181,16 @@ class V2_comments_model extends CI_Model
     }
 
 
-    
+    //커멘트 기본 레코드값 셋팅
+    private function init_comment_tee_recode($idx){
+        return [
+            'comment_idx' => $idx,
+            'root_idx' => $idx,
+            'path' => sprintf('%010d/',$idx)
+,            'depth' => 0
+        ];
+    }
+
     // 댓글 - 추가 모달 
     public function insert($comment_data)
     {
